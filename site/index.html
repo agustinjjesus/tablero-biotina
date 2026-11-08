@@ -191,8 +191,9 @@
     let act = punto('Actualizado ' + fmt.format(cuando));
     if (d.ventas_actualizadas) act += punto(' Ventas de la base: ' + fmt.format(new Date(d.ventas_actualizadas)));
     $('act').textContent = act;
-    const horas = (Date.now() - cuando.getTime()) / 36e5;
-    if (horas > 3) { $('viejo').hidden = false; $('viejo').textContent = 'Los números tienen ' + Math.floor(horas) + ' horas: puede que la actualización automática esté frenada.'; }
+    const min = (Date.now() - cuando.getTime()) / 6e4;
+    $('viejo').hidden = !(min > 30);
+    if (min > 30) $('viejo').textContent = 'Los números tienen ' + (min >= 120 ? Math.floor(min / 60) + ' horas' : Math.floor(min) + ' minutos') + ': puede que la actualización automática esté frenada.';
 
     $('toma').innerHTML = '<b>' + NUM.format(r.andando) + '</b> anuncios andando en la web, <b>' + NUM.format(r.sacar) + '</b> para sacar y <b>' + NUM.format(r.escalar) +
       '</b> para escalar. Las campañas de la prueba gastaron <b>' + USD.format(r.gasto) + '</b> desde el 7/11 a la noche.';
@@ -236,10 +237,18 @@
     $('reglas').replaceChildren(...reglas.flatMap(([k, v]) => [el('dt', null, k), el('dd', null, v)]));
   }
 
-  fetch('datos.json?v=' + Date.now(), { cache: 'no-store' })
-    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(mostrar)
-    .catch((e) => { $('act').textContent = ''; const m = el('div', 'error', 'No se pudieron cargar los números (' + e.message + ').'); $('raiz').prepend(m); });
+  // Trae los números y los dibuja; se repite solo cada 2 minutos para que una pestaña abierta no quede vieja.
+  function cargar() {
+    fetch('datos.json?v=' + Date.now(), { cache: 'no-store' })
+      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then((d) => { document.querySelectorAll('.error').forEach((e) => e.remove()); mostrar(d); })
+      .catch((e) => {
+        document.querySelectorAll('.error').forEach((x) => x.remove());
+        $('raiz').prepend(el('div', 'error', 'No se pudieron cargar los números (' + e.message + ').'));
+      });
+  }
+  cargar();
+  setInterval(cargar, 120000);
 })();
 </script>
 </body>
