@@ -1,0 +1,218 @@
+{
+ "actualizado": "2026-11-08T19:07:02.883Z",
+ "inicio": "2026-11-07T21:20:00-03:00",
+ "reglas": {
+  "max": 15,
+  "minGasto": 10,
+  "visitaMax": 0.4,
+  "minAndando": 3
+ },
+ "claves": [
+  [
+   "Bio 3b",
+   "bio3b"
+  ],
+  [
+   "Bio 5",
+   "bio5"
+  ],
+  [
+   "Video 24",
+   "video24-cuotas"
+  ],
+  [
+   "Bio 7",
+   "bio7-pagos"
+  ],
+  [
+   "Video 26",
+   "video26-chat"
+  ],
+  [
+   "Video 28",
+   "video28-dia"
+  ],
+  [
+   "Video 29",
+   "video29-compra"
+  ],
+  [
+   "Video 30",
+   "video30-pais"
+  ]
+ ],
+ "anuncios": [
+  {
+   "id": "120251365039560518",
+   "anuncio": "Video 29 Asi se compra - Web",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-08",
+   "gasto": 0,
+   "impresiones": 5,
+   "frecuencia": 5,
+   "clics": 0,
+   "ctr": 0,
+   "visitas": 0,
+   "carritos": 0,
+   "inicios": 0,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251365039780518",
+   "anuncio": "Video 30 Enviamos a todo el pais - Web",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-08",
+   "gasto": 0.08,
+   "impresiones": 18,
+   "frecuencia": 6,
+   "clics": 0,
+   "ctr": 11.11,
+   "visitas": 0,
+   "carritos": 0,
+   "inicios": 0,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251365039350518",
+   "anuncio": "Video 28 Cuanto sale por dia - Web",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-08",
+   "gasto": 0.15,
+   "impresiones": 66,
+   "frecuencia": 2.129032,
+   "clics": 2,
+   "ctr": 6.06,
+   "visitas": 0,
+   "carritos": 0,
+   "inicios": 0,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251361285090518",
+   "anuncio": "Video 26 Chat - Web",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-08",
+   "gasto": 3.63,
+   "impresiones": 629,
+   "frecuencia": 1.101576,
+   "clics": 49,
+   "ctr": 10.02,
+   "visitas": 42,
+   "carritos": 4,
+   "inicios": 1,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251361284480518",
+   "anuncio": "Bio 7 Web - Formas de pago",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-08",
+   "gasto": 7.35,
+   "impresiones": 1944,
+   "frecuencia": 1.184644,
+   "clics": 102,
+   "ctr": 6.53,
+   "visitas": 82,
+   "carritos": 6,
+   "inicios": 2,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251357425490518",
+   "anuncio": "Video 24 En cuotas - Web",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-07",
+   "gasto": 2.14,
+   "impresiones": 328,
+   "frecuencia": 1.047923,
+   "clics": 20,
+   "ctr": 8.84,
+   "visitas": 16,
+   "carritos": 2,
+   "inicios": 0,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251357424720518",
+   "anuncio": "Bio 5 Web - 2 frascos a 15 mil",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-07",
+   "gasto": 7.08,
+   "impresiones": 2099,
+   "frecuencia": 1.151399,
+   "clics": 101,
+   "ctr": 6.62,
+   "visitas": 82,
+   "carritos": 2,
+   "inicios": 0,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251357424280518",
+   "anuncio": "Bio 3b Web - Precios con foto",
+   "campana": "Web - Biotina Inicio de compra 07-11",
+   "campana_id": "120251357412150518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-07",
+   "gasto": 11.05,
+   "impresiones": 2803,
+   "frecuencia": 1.134359,
+   "clics": 153,
+   "ctr": 7.96,
+   "visitas": 117,
+   "carritos": 10,
+   "inicios": 1,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251357425730518",
+   "anuncio": "RT Video 24 En cuotas",
+   "campana": "Web - Retargeting Biotina 07-11",
+   "campana_id": "120251357412410518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-07",
+   "gasto": 3.66,
+   "impresiones": 367,
+   "frecuencia": 1.497959,
+   "clics": 10,
+   "ctr": 3,
+   "visitas": 11,
+   "carritos": 0,
+   "inicios": 0,
+   "compras_meta": 0
+  },
+  {
+   "id": "120251357425580518",
+   "anuncio": "RT Bio 5 - 2 frascos a 15 mil",
+   "campana": "Web - Retargeting Biotina 07-11",
+   "campana_id": "120251357412410518",
+   "estado": "ACTIVE",
+   "creado": "2026-11-07",
+   "gasto": 3.42,
+   "impresiones": 511,
+   "frecuencia": 1.498534,
+   "clics": 8,
+   "ctr": 2.54,
+   "visitas": 10,
+   "carritos": 0,
+   "inicios": 0,
+   "compras_meta": 0
+  }
+ ],
+ "ventas": null,
+ "ventas_actualizadas": null
+}

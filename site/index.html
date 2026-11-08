@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Anuncios Biotina</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23a03a4b'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #f6e9e4; --panel: #ffffff; --linea: #ecd5ce; --texto: #33201d; --suave: #6e4e48; --acento: #a03a4b;
+    --rojo: #b3261e; --verde: #1e7a46; --ambar: #a86a00; --gris: #8d7a74;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1d1514; --panel: #2a1d1b; --linea: #4a3430; --texto: #f6e9e4; --suave: #cdb1aa; --acento: #e58a99;
+      --rojo: #ff8a80; --verde: #6fd09a; --ambar: #f2b84b; --gris: #a8958f; }
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body { margin: 0; background: var(--bg); color: var(--texto); font-family: Outfit, system-ui, sans-serif; line-height: 1.45; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 20px; }
+  h1 { font-size: clamp(1.7rem, 5vw, 2.3rem); margin: 0; letter-spacing: -0.02em; }
+  h2 { font-size: 1.15rem; margin: 0; }
+  .act { color: var(--suave); font-size: .9rem; margin: 4px 0 0; }
+  .toma { margin: 10px 0 0; font-size: 1.05rem; max-width: 70ch; }
+  .toma b { font-weight: 700; }
+  .aviso { margin: 0; padding: 10px 14px; border: 1px solid var(--linea); border-radius: 12px; background: var(--panel); font-size: .95rem; max-width: 70ch; }
+  .aviso.mal { color: var(--rojo); border-color: var(--rojo); }
+  .numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .num { background: var(--panel); border: 1px solid var(--linea); border-radius: 16px; padding: 16px; }
+  .num .l { font-size: .85rem; color: var(--suave); }
+  .num .g { font-size: 2rem; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .num .s { font-size: .85rem; color: var(--suave); }
+  .num .s b { color: var(--texto); font-weight: 600; }
+  .tarjeta { background: var(--panel); border: 1px solid var(--linea); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .nota { margin: 0; font-size: .88rem; color: var(--suave); max-width: 80ch; }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+  th { text-align: right; font-weight: 500; color: var(--suave); padding: 6px 10px; border-bottom: 1px solid var(--linea); white-space: nowrap; }
+  td { text-align: right; padding: 10px; border-bottom: 1px solid var(--linea); white-space: nowrap; }
+  th:nth-child(-n+3), td:nth-child(-n+3) { text-align: left; }
+  th:last-child, td:last-child { text-align: left; white-space: normal; min-width: 14rem; }
+  td:first-child { font-weight: 600; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1.5px solid currentColor; font-weight: 600; font-size: .85rem; }
+  .l-sacar { color: var(--rojo); } .l-escalar { color: var(--verde); } .l-esperando, .l-revision { color: var(--ambar); }
+  .l-mantener { color: var(--texto); } .l-apagado { color: var(--gris); }
+  .grafico svg { width: 100%; height: auto; display: block; }
+  .grafico text { font-family: Outfit, system-ui, sans-serif; }
+  details summary { cursor: pointer; font-weight: 600; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0 0; max-width: 80ch; }
+  dt { font-weight: 600; } dd { margin: 0; color: var(--suave); }
+  .pie { color: var(--suave); font-size: .8rem; }
+  .error { padding: 14px; border: 1px solid var(--rojo); color: var(--rojo); border-radius: 12px; background: var(--panel); }
+  @media (max-width: 760px) {
+    table, thead, tbody, tr, td { display: block; }
+    thead { display: none; }
+    tr { border: 1px solid var(--linea); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; }
+    td { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 4px 0; text-align: right !important; white-space: normal; min-width: 0 !important; }
+    td::before { content: attr(data-l); color: var(--suave); text-align: left; flex: none; }
+    td:first-child { font-size: 1.05rem; } td:first-child::before { content: ''; }
+    td:nth-child(-n+3) { justify-content: flex-start; text-align: left !important; }
+    td:last-child { display: block; text-align: left !important; color: var(--suave); padding-top: 8px; }
+    td:last-child::before { content: ''; }
+    dl { grid-template-columns: 1fr; }
+    .numeros { grid-template-columns: repeat(2, 1fr); }
+    .num { padding: 12px; } .num .g { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<main id="raiz">
+  <header>
+    <h1>Anuncios Biotina</h1>
+    <p class="act" id="act">Cargando…</p>
+    <p class="toma" id="toma"></p>
+  </header>
+  <p class="aviso mal" id="faltan" hidden></p>
+  <p class="aviso" id="sinventas" hidden>Las ventas reales de la base todavía no están cargadas. Mientras tanto, el semáforo cuenta las compras que vio Meta.</p>
+  <p class="aviso mal" id="viejo" hidden></p>
+
+  <section class="numeros" id="numeros"></section>
+
+  <section class="tarjeta">
+    <h2>Semáforo por anuncio</h2>
+    <p class="nota">Cada anuncio desde que se prendió. Prueba es la campaña "Inicio de compra" y RT la de retargeting a quienes ya visitaron la web. Las ventas de los RT se cuentan en el anuncio original, porque usan el mismo link.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Anuncio</th><th>Campaña</th><th>Semáforo</th><th>Gasto</th><th>Visitas</th><th>US$ por visita</th><th>Carritos</th><th>Compras Meta</th><th>Ventas reales</th><th>US$ por venta</th><th>Qué hacer</th></tr></thead>
+        <tbody id="filas"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tarjeta">
+    <h2>Cuánto cuesta cada visita a la web</h2>
+    <p class="nota" id="notagraf"></p>
+    <div class="grafico" id="grafico"></div>
+  </section>
+
+  <details class="tarjeta">
+    <summary>Cómo decide el semáforo</summary>
+    <dl id="reglas"></dl>
+  </details>
+
+  <p class="pie">Los números de Meta y las ventas de la base se actualizan solos. Esta página no se indexa en buscadores.</p>
+</main>
+
+<script>
+(function () {
+  const USD = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const USD0 = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const NUM = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 });
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const c = (v, f) => (v == null ? '—' : f(v));
+
+  function calcular(d) {
+    const R = d.reglas, MAX = R.max, MIN_GASTO = R.minGasto, VISITA_MAX = R.visitaMax;
+    const hayVentas = Array.isArray(d.ventas) && d.ventas.length > 0;
+    const porClave = new Map((d.ventas || []).map((v) => [String(v.clave), v]));
+    const ORDEN = { Sacar: 0, Escalar: 1, Mantener: 2, Esperando: 3, 'En revisión': 4, Apagado: 5 };
+    const filas = d.anuncios.map((a) => {
+      const rt = /^RT /.test(a.anuncio) || /Retargeting/i.test(a.campana || '');
+      const par = d.claves.find(([nombre]) => String(a.anuncio).includes(nombre));
+      const v = !rt && par && hayVentas ? porClave.get(par[1]) : null;
+      const ventas = rt || !hayVentas ? null : Number(v ? v.ventas : 0);
+      const vendidas = ventas != null ? ventas : a.compras_meta;
+      const costoVisita = a.visitas > 0 ? a.gasto / a.visitas : null;
+      let luz, clase, motivo;
+      if (['PAUSED', 'CAMPAIGN_PAUSED', 'ADSET_PAUSED', 'ARCHIVED', 'DELETED'].includes(a.estado)) { luz = 'Apagado'; clase = 'apagado'; motivo = 'Está pausado.'; }
+      else if (['IN_PROCESS', 'PENDING_REVIEW'].includes(a.estado)) { luz = 'En revisión'; clase = 'revision'; motivo = 'Meta lo está revisando.'; }
+      else if (['DISAPPROVED', 'WITH_ISSUES'].includes(a.estado)) { luz = 'Sacar'; clase = 'sacar'; motivo = 'Meta lo rechazó o tiene un problema: hay que reemplazarlo.'; }
+      else if (vendidas >= 2 && a.gasto / vendidas <= MAX) { luz = 'Escalar'; clase = 'escalar'; motivo = 'Vende a ' + (a.gasto / vendidas).toFixed(2) + ' US$ por venta: subirle 20% el presupuesto.'; }
+      else if (a.gasto >= 2 * MAX && !(vendidas > 0)) { luz = 'Sacar'; clase = 'sacar'; motivo = 'Gastó ' + a.gasto.toFixed(2) + ' US$ sin vender: pausarlo.'; }
+      else if (a.gasto >= MIN_GASTO && (costoVisita == null || costoVisita > VISITA_MAX)) { luz = 'Sacar'; clase = 'sacar'; motivo = costoVisita == null ? 'Gastó sin traer visitas: pausarlo.' : 'Cada visita sale ' + costoVisita.toFixed(2) + ' US$: pausarlo.'; }
+      else if (a.gasto < MIN_GASTO) { luz = 'Esperando'; clase = 'esperando'; motivo = 'Le faltan ' + (MIN_GASTO - a.gasto).toFixed(2) + ' US$ de gasto para juzgarlo.'; }
+      else { luz = 'Mantener'; clase = 'mantener'; motivo = 'Va bien de visitas; hay que ver si vende.'; }
+      return { id: a.id, anuncio: a.anuncio, tipo: rt ? 'RT' : 'Prueba', luz, clase, estado: a.estado, gasto: a.gasto, visitas: a.visitas,
+        costo_visita: costoVisita, carritos: a.carritos, compras_meta: a.compras_meta, ventas, costo_venta: vendidas > 0 ? a.gasto / vendidas : null, motivo };
+    });
+    filas.sort((x, y) => (ORDEN[x.luz] - ORDEN[y.luz]) || (y.gasto - x.gasto));
+    const suma = (k) => filas.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+    const gasto = suma('gasto'), visitas = suma('visitas');
+    const conVentas = filas.filter((r) => r.ventas != null);
+    const ventasTot = conVentas.length ? conVentas.reduce((s, r) => s + r.ventas, 0) : null;
+    const andando = filas.filter((r) => r.estado === 'ACTIVE' && r.luz !== 'Sacar').length;
+    const revision = filas.filter((r) => r.luz === 'En revisión').length;
+    return { filas, resumen: { gasto, visitas, costo_visita: visitas > 0 ? gasto / visitas : null, carritos: suma('carritos'), compras_meta: suma('compras_meta'),
+      ventas: ventasTot, costo_venta: ventasTot > 0 ? gasto / ventasTot : null, andando, revision,
+      sacar: filas.filter((r) => r.luz === 'Sacar').length, escalar: filas.filter((r) => r.luz === 'Escalar').length,
+      faltan: andando + revision < R.minAndando, sin_ventas: ventasTot == null } };
+  }
+
+  function tile(l, g, s) {
+    const d = el('div', 'num'); d.append(el('div', 'l', l), el('div', 'g', g));
+    if (s) { const x = el('div', 's'); x.innerHTML = s; d.append(x); }
+    return d;
+  }
+  const esc = (t) => String(t).replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+
+  function dibujarGrafico(filas, R) {
+    const cont = $('grafico'); cont.replaceChildren();
+    const lista = filas.filter((r) => r.costo_visita != null).sort((a, b) => b.costo_visita - a.costo_visita);
+    if (!lista.length) { cont.append(el('p', 'nota', 'Todavía ningún anuncio trajo visitas.')); return; }
+    const W = 640, paso = 46, top = 8, H = top + lista.length * paso + 26, izq = 4, der = 70;
+    const maxX = Math.max(R.visitaMax * 1.25, Math.max(...lista.map((r) => r.costo_visita)) * 1.1);
+    const x = (v) => izq + (v / maxX) * (W - der - izq);
+    const color = (r) => (r.luz === 'Sacar' ? 'var(--rojo)' : r.luz === 'Escalar' ? 'var(--verde)' : 'var(--acento)');
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Costo por visita de cada anuncio">';
+    const paso_t = maxX > 1 ? 0.5 : 0.1;
+    for (let t = 0; t <= maxX + 1e-9; t += paso_t) {
+      s += '<line x1="' + x(t) + '" x2="' + x(t) + '" y1="' + top + '" y2="' + (H - 22) + '" stroke="var(--linea)"/>';
+      s += '<text x="' + x(t) + '" y="' + (H - 6) + '" text-anchor="middle" fill="var(--suave)" font-size="11">' + USD.format(t) + '</text>';
+    }
+    lista.forEach((r, i) => {
+      const y = top + i * paso;
+      s += '<text x="' + izq + '" y="' + (y + 12) + '" fill="var(--texto)" font-size="12">' + esc(r.anuncio) + '</text>';
+      s += '<rect x="' + izq + '" y="' + (y + 18) + '" width="' + Math.max(2, x(r.costo_visita) - izq) + '" height="16" rx="3" fill="' + color(r) + '"/>';
+      s += '<text x="' + (x(r.costo_visita) + 6) + '" y="' + (y + 31) + '" fill="var(--suave)" font-size="11">' + USD.format(r.costo_visita) + '</text>';
+    });
+    s += '<line x1="' + x(R.visitaMax) + '" x2="' + x(R.visitaMax) + '" y1="' + top + '" y2="' + (H - 22) + '" stroke="var(--texto)" stroke-dasharray="4 4" stroke-width="1.5"/></svg>';
+    cont.innerHTML = s;
+  }
+
+  function mostrar(d) {
+    const R = d.reglas, { filas, resumen: r } = calcular(d);
+    const cuando = new Date(d.actualizado);
+    const fmt = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const punto = (t) => t.replace(/\.*$/, '.');
+    let act = punto('Actualizado ' + fmt.format(cuando));
+    if (d.ventas_actualizadas) act += punto(' Ventas de la base: ' + fmt.format(new Date(d.ventas_actualizadas)));
+    $('act').textContent = act;
+    const horas = (Date.now() - cuando.getTime()) / 36e5;
+    if (horas > 3) { $('viejo').hidden = false; $('viejo').textContent = 'Los números tienen ' + Math.floor(horas) + ' horas: puede que la actualización automática esté frenada.'; }
+
+    $('toma').innerHTML = '<b>' + NUM.format(r.andando) + '</b> anuncios andando en la web, <b>' + NUM.format(r.sacar) + '</b> para sacar y <b>' + NUM.format(r.escalar) +
+      '</b> para escalar. Las campañas de la prueba gastaron <b>' + USD.format(r.gasto) + '</b> desde el 7/11 a la noche.';
+    $('faltan').hidden = !r.faltan;
+    $('faltan').textContent = 'Quedan menos de ' + R.minAndando + ' anuncios andando o en revisión: hay que cargar anuncios nuevos.';
+    $('sinventas').hidden = !r.sin_ventas;
+
+    $('numeros').replaceChildren(
+      tile('Gasto desde el 7/11', USD.format(r.gasto), 'Prueba + retargeting'),
+      tile('Visitas a la web', NUM.format(r.visitas), 'a <b>' + c(r.costo_visita, (v) => USD.format(v)) + '</b> cada una'),
+      tile('Carritos', NUM.format(r.carritos), '<b>' + NUM.format(r.compras_meta) + '</b> compras que vio Meta'),
+      tile('Ventas reales', r.ventas == null ? '—' : NUM.format(r.ventas), 'a <b>' + c(r.costo_venta, (v) => USD.format(v)) + '</b> de publicidad cada una'));
+
+    const tb = $('filas'); tb.replaceChildren();
+    const L = ['', '', '', 'Gasto', 'Visitas', 'US$ por visita', 'Carritos', 'Compras Meta', 'Ventas reales', 'US$ por venta', ''];
+    filas.forEach((f) => {
+      const tr = el('tr');
+      const cel = [f.anuncio, f.tipo, null, c(f.gasto, (v) => USD.format(v)), c(f.visitas, (v) => NUM.format(v)), c(f.costo_visita, (v) => USD.format(v)),
+        c(f.carritos, (v) => NUM.format(v)), c(f.compras_meta, (v) => NUM.format(v)), c(f.ventas, (v) => NUM.format(v)), c(f.costo_venta, (v) => USD.format(v)), f.motivo];
+      cel.forEach((t, i) => {
+        const td = el('td'); td.dataset.l = L[i];
+        if (i === 2) td.append(el('span', 'pill l-' + f.clase, f.luz)); else td.textContent = t;
+        tr.append(td);
+      });
+      tb.append(tr);
+    });
+
+    $('notagraf').textContent = 'Anuncios que ya trajeron visitas. La línea punteada es el límite de ' + USD.format(R.visitaMax) + ' por visita: un anuncio que gastó más de ' +
+      USD0.format(R.minGasto) + ' y queda a la derecha de la línea se saca.';
+    dibujarGrafico(filas, R);
+
+    const reglas = [
+      ['Esperando', 'Gastó menos de ' + USD0.format(R.minGasto) + '. Todavía no se puede juzgar.'],
+      ['Sacar', 'Gastó ' + USD0.format(2 * R.max) + ' o más sin vender (el doble del máximo por venta), o cada visita le sale más de ' + USD.format(R.visitaMax) + '.'],
+      ['Escalar', 'Tiene 2 ventas o más y cada una salió ' + USD0.format(R.max) + ' o menos de publicidad. Se le sube un 20% el presupuesto cada 2 o 3 días.'],
+      ['Mantener', 'Todo lo demás: sigue prendido y se vuelve a mirar.'],
+      ['En revisión', 'Meta todavía lo está revisando y no gastó.'],
+      ['Ventas reales', 'Pedidos de la web cobrados, contados en nuestra base por el link de cada anuncio. Las compras de Meta son las que vio el píxel y pueden no coincidir.'],
+      ['Aviso de reposición', 'Si quedan menos de ' + R.minAndando + ' anuncios andando o en revisión, arriba aparece el aviso para cargar nuevos.'],
+    ];
+    $('reglas').replaceChildren(...reglas.flatMap(([k, v]) => [el('dt', null, k), el('dd', null, v)]));
+  }
+
+  fetch('datos.json?v=' + Date.now(), { cache: 'no-store' })
+    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(mostrar)
+    .catch((e) => { $('act').textContent = ''; const m = el('div', 'error', 'No se pudieron cargar los números (' + e.message + ').'); $('raiz').prepend(m); });
+})();
+</script>
+</body>
+</html>

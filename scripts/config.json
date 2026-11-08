@@ -1,0 +1,15 @@
+{
+  "reglas": { "max": 15, "minGasto": 10, "visitaMax": 0.4, "minAndando": 3 },
+  "inicio": "2026-11-07T21:20:00-03:00",
+  "campanas": ["120251357412150518", "120251357412410518"],
+  "claves": [
+    ["Bio 3b", "bio3b"],
+    ["Bio 5", "bio5"],
+    ["Video 24", "video24-cuotas"],
+    ["Bio 7", "bio7-pagos"],
+    ["Video 26", "video26-chat"],
+    ["Video 28", "video28-dia"],
+    ["Video 29", "video29-compra"],
+    ["Video 30", "video30-pais"]
+  ]
+}
