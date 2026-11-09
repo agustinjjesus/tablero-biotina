@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-09T14:30:40.828Z",
+ "actualizado": "2026-11-09T14:40:04.887Z",
  "inicio": "2026-11-07T21:20:00-03:00",
  "reglas": {
   "max": 15,
@@ -83,7 +83,7 @@
    "frecuencia": 1.046674,
    "clics": 93,
    "ctr": 8.25,
-   "visitas": 72,
+   "visitas": 84,
    "carritos": 4,
    "inicios": 0,
    "compras_meta": 0
@@ -148,8 +148,8 @@
    "creado": "2026-11-08",
    "gasto": 8.02,
    "impresiones": 1586,
-   "frecuencia": 1.349787,
-   "clics": 106,
+   "frecuencia": 1.344068,
+   "clics": 107,
    "ctr": 8.7,
    "visitas": 88,
    "carritos": 9,
@@ -268,9 +268,9 @@
    "gasto": 7.89,
    "impresiones": 1484,
    "frecuencia": 2.110953,
-   "clics": 23,
+   "clics": 24,
    "ctr": 2.22,
-   "visitas": 19,
+   "visitas": 20,
    "carritos": 1,
    "inicios": 0,
    "compras_meta": 0
