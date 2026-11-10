@@ -138,7 +138,7 @@ if (op.estado && fs.existsSync(op.estado)) {
   try { estado = JSON.parse(fs.readFileSync(op.estado, 'utf8')); } catch (e) { console.error('estado.json ilegible: se conserva el estado anterior'); }
 }
 let manual = previo.manual || null;
-try { manual = JSON.parse(fs.readFileSync(path.join(raiz, 'site', 'manual.json'), 'utf8')); } catch (e) { /* sin notas */ }
+try { manual = JSON.parse(fs.readFileSync(path.join(raiz, 'privado', 'manual.json'), 'utf8')); } catch (e) { /* sin notas */ }
 
 const datos = {
   actualizado: ahora, inicio: cfg.inicio, whatsapp_desde: cfg.whatsappDesde || null, reglas: cfg.reglas, claves: cfg.claves, anuncios,
@@ -147,7 +147,28 @@ const datos = {
   wsp, wsp_actualizado: wspAct, estado, manual,
 };
 fs.writeFileSync(destino, JSON.stringify(datos, null, 1));
+
+// ── Cifrado con PIN ────────────────────────────────────────────────────────────────────────────────
+// Lo que se sube a GitHub es site/datos.enc.json (AES-256-GCM, clave derivada del PIN con PBKDF2). El PIN está en
+// scripts/pin.txt (no se sube: .gitignore) o en la variable PIN_TABLERO. site/datos.json queda solo en esta PC.
+// Ojo: un PIN de 4 números frena a quien mira de curioso, no a alguien que quiera adivinarlo con un programa.
+let cifradoOk = false;
+try {
+  const crypto = require('crypto');
+  const pin = (process.env.PIN_TABLERO || (fs.existsSync(path.join(__dirname, 'pin.txt')) ? fs.readFileSync(path.join(__dirname, 'pin.txt'), 'utf8') : '')).trim();
+  if (pin) {
+    const salt = crypto.randomBytes(16), iv = crypto.randomBytes(12), iter = 200000;
+    const clave = crypto.pbkdf2Sync(pin, salt, iter, 32, 'sha256');
+    const c = crypto.createCipheriv('aes-256-gcm', clave, iv);
+    const cuerpo = Buffer.concat([c.update(JSON.stringify(datos), 'utf8'), c.final()]);
+    const sobre = { v: 1, iter, salt: salt.toString('base64'), iv: iv.toString('base64'), data: Buffer.concat([cuerpo, c.getAuthTag()]).toString('base64') };
+    fs.writeFileSync(process.env.DATOS_ENC_SALIDA || path.join(raiz, 'site', 'datos.enc.json'), JSON.stringify(sobre));
+    cifradoOk = true;
+  } else {
+    console.error('Sin PIN (scripts/pin.txt): no se generó datos.enc.json');
+  }
+} catch (e) { console.error('No se pudo cifrar: ' + e.message); }
 const gasto = anuncios.reduce((s, a) => s + a.gasto, 0);
 console.log('anuncios ' + anuncios.length + ' · gasto US$ ' + gasto.toFixed(2) + ' · ventas ' + (ventas ? ventas.reduce((s, v) => s + Number(v.ventas || 0), 0) : 'sin cargar') +
   ' · hoy ' + (hoy ? 'US$ ' + hoy.gasto.toFixed(2) : 'sin datos') + ' · charlas WhatsApp ' + (wsp ? wsp.reduce((s, w) => s + (w.charlas || 0), 0) : 'sin datos') +
-  ' · estado ' + (estado ? estado.items.filter((i) => i.ok === false).length + ' con problema' : 'sin chequeo'));
+  ' · estado ' + (estado ? estado.items.filter((i) => i.ok === false).length + ' con problema' : 'sin chequeo') + ' · cifrado ' + (cifradoOk ? 'sí' : 'NO'));
