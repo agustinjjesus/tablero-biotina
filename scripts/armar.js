@@ -124,7 +124,7 @@ if (filasWsp && filasWsp.length) {
   const RE = 'cost_per_action_type:onsite_conversion.messaging_first_reply';
   wsp = filasWsp.map((r) => {
     const gasto = n(r.amount_spent), cCharla = n(r[CH]), cResp = n(r[RE]);
-    return { id: String(r.id), anuncio: r.name, estado: r.effective_status, gasto, charlas: cCharla > 0 ? Math.round(gasto / cCharla) : (gasto > 0 ? 0 : null),
+    return { id: String(r.id), campana_id: String(r.campaign_id || ''), anuncio: r.name, estado: r.effective_status, gasto, charlas: cCharla > 0 ? Math.round(gasto / cCharla) : (gasto > 0 ? 0 : null),
       respondidas: cResp > 0 ? Math.round(gasto / cResp) : (gasto > 0 ? 0 : null), compras_meta: n(r.omni_purchase) };
   }).sort((a, b) => b.gasto - a.gasto);
   wspAct = ahora;

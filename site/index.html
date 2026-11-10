@@ -133,12 +133,23 @@
   </section>
 
   <section class="tarjeta" id="sec-camp" hidden>
-    <h2>Campañas</h2>
-    <p class="nota">Todas las campañas con su presupuesto y lo que trajeron. "Abrieron el formulario" es el carrito del píxel; "Lo enviaron" es el inicio de compra.</p>
+    <h2>Campañas de la web</h2>
+    <p class="nota">Las campañas que mandan a la web, con su presupuesto y lo que trajeron. "Abrieron el formulario" es el carrito del píxel; "Lo enviaron" es el inicio de compra.</p>
     <div class="scroll">
       <table class="t2">
         <thead><tr><th>Campaña</th><th>Estado</th><th>Presupuesto por día</th><th>Gasto hoy</th><th>Gasto total</th><th>Visitas</th><th>Abrieron el formulario</th><th>Lo enviaron</th><th>Compras Meta</th></tr></thead>
         <tbody id="camp"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tarjeta" id="sec-campwsp" hidden>
+    <h2>Campañas de WhatsApp</h2>
+    <p class="nota" id="campwsp-nota"></p>
+    <div class="scroll">
+      <table class="t2">
+        <thead><tr><th>Campaña</th><th>Estado</th><th>Presupuesto por día</th><th>Gasto hoy</th><th>Gasto total</th><th>Charlas</th><th>US$ por charla</th><th>Respondidas</th><th>Compras Meta</th></tr></thead>
+        <tbody id="campwsp"></tbody>
       </table>
     </div>
   </section>
@@ -358,10 +369,28 @@
       const tb = $('camp'); tb.replaceChildren();
       const orden = camps.slice().sort((a, b) => ((b.estado === 'ACTIVE') - (a.estado === 'ACTIVE')) || (b.total.gasto - a.total.gasto));
       const L = ['', 'Estado', 'Presupuesto por día', 'Gasto hoy', 'Gasto total', 'Visitas', 'Abrieron el formulario', 'Lo enviaron', 'Compras Meta'];
-      orden.forEach((c) => fila(tb, [c.nombre, ESTADO_TXT[c.estado] || c.estado, c.presupuesto ? USD0.format(c.presupuesto) : '—', u2(c.hoy.gasto), u2(c.total.gasto),
+      const web = orden.filter((c) => c.tipo !== 'whatsapp');
+      web.forEach((c) => fila(tb, [c.nombre, ESTADO_TXT[c.estado] || c.estado, c.presupuesto ? USD0.format(c.presupuesto) : '—', u2(c.hoy.gasto), u2(c.total.gasto),
         n0(c.total.visitas), n0(c.total.carritos), n0(c.total.inicios), n0(c.total.compras)], L));
+      mostrarSec('sec-camp', web.length > 0);
+
+      // Campañas de WhatsApp: sus datos son charlas, no visitas ni formulario. Las charlas salen de las filas por anuncio (wsp).
+      const tw = $('campwsp'); tw.replaceChildren();
+      const wc = orden.filter((c) => c.tipo === 'whatsapp');
+      const Lw = ['', 'Estado', 'Presupuesto por día', 'Gasto hoy', 'Gasto total', 'Charlas', 'US$ por charla', 'Respondidas', 'Compras Meta'];
+      wc.forEach((c) => {
+        const fs = wsp ? wsp.filter((w) => w.campana_id === c.id) : [];
+        const g = fs.reduce((s, w) => s + (w.gasto || 0), 0), ch = fs.reduce((s, w) => s + (w.charlas || 0), 0);
+        const re = fs.reduce((s, w) => s + (w.respondidas || 0), 0), pc = fs.reduce((s, w) => s + (w.compras_meta || 0), 0);
+        const hay = fs.length > 0;
+        fila(tw, [c.nombre, ESTADO_TXT[c.estado] || c.estado, c.presupuesto ? USD0.format(c.presupuesto) : '—', u2(c.hoy.gasto), u2(c.total.gasto),
+          hay ? NUM.format(ch) : '—', hay && ch > 0 ? USD.format(g / ch) : '—', hay ? NUM.format(re) : '—', hay ? NUM.format(pc) : '—'], Lw);
+      });
+      $('campwsp-nota').textContent = 'Charlas = conversaciones de WhatsApp que empezaron desde el anuncio, contadas desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + '. Respondidas = a las que se les contestó. Las compras son las que Meta recibió: con el servidor caído no le llegan, así que las ventas de WhatsApp las confirma Dolo.';
+      mostrarSec('sec-campwsp', wc.length > 0);
+    } else {
+      mostrarSec('sec-camp', false); mostrarSec('sec-campwsp', false);
     }
-    mostrarSec('sec-camp', !!camps);
 
     // Edades
     const ed = d.edades && Array.isArray(d.edades.por_campana) ? d.edades.por_campana.filter((c) => (c.total || []).some((x) => x.gasto > 0)) : [];
