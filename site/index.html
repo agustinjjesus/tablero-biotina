@@ -52,6 +52,29 @@
   dt { font-weight: 600; } dd { margin: 0; color: var(--suave); }
   .pie { color: var(--suave); font-size: .8rem; }
   .error { padding: 14px; border: 1px solid var(--rojo); color: var(--rojo); border-radius: 12px; background: var(--panel); }
+  .t2 th, .t2 td { text-align: right; }
+  .t2 th:first-child, .t2 td:first-child { text-align: left; }
+  .t2 th:last-child, .t2 td:last-child { min-width: 0; white-space: nowrap; }
+  .t2 td:last-child { text-align: right; }
+  .barra { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--linea); }
+  .barra i { display: block; height: 100%; }
+  .e0 { background: #e3b8c0; } .e1 { background: #cf8396; } .e2 { background: #a03a4b; } .e3 { background: #7d6b9e; } .e4 { background: #8d7a74; } .e5 { background: var(--rojo); } .e6 { background: #cfc3be; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8rem; color: var(--suave); }
+  .leyenda span { display: inline-flex; align-items: center; gap: 5px; }
+  .leyenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .fila-edad { display: grid; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--linea); }
+  .fila-edad .tit { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-weight: 600; }
+  .fila-edad .tit span { font-weight: 400; color: var(--suave); font-size: .9rem; }
+  .mal65 { color: var(--rojo); font-weight: 600; } .bien65 { color: var(--verde); font-weight: 600; }
+  .estados { display: grid; gap: 10px; }
+  .est { display: flex; gap: 10px; align-items: flex-start; }
+  .punto { width: 12px; height: 12px; border-radius: 50%; margin-top: 7px; flex: none; background: var(--gris); }
+  .punto.ok { background: var(--verde); } .punto.mal { background: var(--rojo); }
+  .est b { display: block; font-weight: 600; } .est span { color: var(--suave); font-size: .9rem; }
+  ul.lista { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+  ul.lista li { max-width: 80ch; } ul.lista .quien { color: var(--suave); font-size: .85rem; white-space: nowrap; }
+  .hoy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; }
+  .hoy-grid .num .g { font-size: 1.6rem; }
   @media (max-width: 760px) {
     table, thead, tbody, tr, td { display: block; }
     thead { display: none; }
@@ -65,6 +88,11 @@
     dl { grid-template-columns: 1fr; }
     .numeros { grid-template-columns: repeat(2, 1fr); }
     .num { padding: 12px; } .num .g { font-size: 1.5rem; }
+    .t2 td:nth-child(-n+3) { justify-content: space-between; text-align: right !important; }
+    .t2 td:last-child { display: flex; padding-top: 4px; color: var(--texto); }
+    .t2 td:last-child::before { content: attr(data-l); }
+    .t2 td:first-child { display: block; text-align: left !important; font-size: 1.05rem; }
+    .hoy-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -78,6 +106,41 @@
   <p class="aviso mal" id="faltan" hidden></p>
   <p class="aviso" id="sinventas" hidden>Las ventas reales de la base todavía no están cargadas. Mientras tanto, el semáforo cuenta las compras que vio Meta.</p>
   <p class="aviso mal" id="viejo" hidden></p>
+
+  <section class="tarjeta" id="sec-hoy" hidden>
+    <h2 id="hoy-tit">Hoy</h2>
+    <p class="nota" id="hoy-nota"></p>
+    <div class="hoy-grid" id="hoy"></div>
+  </section>
+
+  <section class="tarjeta" id="sec-camp" hidden>
+    <h2>Campañas</h2>
+    <p class="nota">Todas las campañas con su presupuesto y lo que trajeron. "Abrieron el formulario" es el carrito del píxel; "Lo enviaron" es el inicio de compra.</p>
+    <div class="scroll">
+      <table class="t2">
+        <thead><tr><th>Campaña</th><th>Estado</th><th>Presupuesto por día</th><th>Gasto hoy</th><th>Gasto total</th><th>Visitas</th><th>Abrieron el formulario</th><th>Lo enviaron</th><th>Compras Meta</th></tr></thead>
+        <tbody id="camp"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tarjeta" id="sec-edad" hidden>
+    <h2>A quién le llegan los anuncios (por edad)</h2>
+    <p class="nota" id="edad-nota"></p>
+    <div class="leyenda" id="edad-ley"></div>
+    <div id="edad"></div>
+  </section>
+
+  <section class="tarjeta" id="sec-wsp" hidden>
+    <h2>WhatsApp</h2>
+    <p class="nota" id="wsp-nota"></p>
+    <div class="scroll">
+      <table class="t2">
+        <thead><tr><th>Anuncio</th><th>Estado</th><th>Gasto</th><th>Charlas</th><th>US$ por charla</th><th>Respondidas</th><th>Compras Meta</th><th>US$ por compra</th></tr></thead>
+        <tbody id="wsp"></tbody>
+      </table>
+    </div>
+  </section>
 
   <section class="numeros" id="numeros"></section>
 
@@ -96,6 +159,33 @@
     <h2>Cuánto cuesta cada visita a la web</h2>
     <p class="nota" id="notagraf"></p>
     <div class="grafico" id="grafico"></div>
+  </section>
+
+  <section class="tarjeta" id="sec-dias" hidden>
+    <h2>Día por día</h2>
+    <p class="nota">Todas las campañas juntas, por día (hora de Argentina).</p>
+    <div class="scroll">
+      <table class="t2">
+        <thead><tr><th>Día</th><th>Gasto</th><th>Visitas</th><th>Abrieron el formulario</th><th>Lo enviaron</th><th>Compras Meta</th></tr></thead>
+        <tbody id="dias"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="tarjeta" id="sec-estado" hidden>
+    <h2>Estado del sistema</h2>
+    <p class="nota" id="estado-nota"></p>
+    <div class="estados" id="estado"></div>
+  </section>
+
+  <section class="tarjeta" id="sec-pend" hidden>
+    <h2>Pendientes</h2>
+    <ul class="lista" id="pend"></ul>
+  </section>
+
+  <section class="tarjeta" id="sec-notas" hidden>
+    <h2>Cobros y notas</h2>
+    <ul class="lista" id="notas"></ul>
   </section>
 
   <details class="tarjeta">
@@ -120,10 +210,27 @@
     const hayVentas = Array.isArray(d.ventas) && d.ventas.length > 0;
     const porClave = new Map((d.ventas || []).map((v) => [String(v.clave), v]));
     const ORDEN = { Sacar: 0, Escalar: 1, Mantener: 2, Esperando: 3, 'En revisión': 4, Apagado: 5 };
-    const filas = d.anuncios.map((a) => {
-      const rt = /^RT /.test(a.anuncio) || /Retargeting/i.test(a.campana || '');
+    const esWsp = (a) => /whatsapp/i.test(a.campana || '');
+    const lista = d.anuncios.filter((a) => !esWsp(a));
+    const claveDe = (a) => { const p = d.claves.find(([nombre]) => String(a.anuncio).includes(nombre)); return p ? p[1] : null; };
+    const esRt = (a) => /^RT /.test(a.anuncio) || /Retargeting/i.test(a.campana || '');
+    // Dos anuncios pueden compartir el link (el original y su copia "IC"): las ventas del link se cuentan una sola vez,
+    // en el que está andando (o, si ninguno, en el que más gastó), y el costo por venta usa el gasto de todos los que comparten ese link.
+    const grupo = new Map();
+    lista.filter((a) => !esRt(a) && claveDe(a)).forEach((a) => {
+      const k = claveDe(a), g = grupo.get(k) || { gasto: 0, dueno: null, puntos: -1 };
+      const puntos = (['ACTIVE', 'IN_PROCESS', 'PENDING_REVIEW'].includes(a.estado) ? 1e6 : 0) + a.gasto;
+      g.gasto += a.gasto;
+      if (puntos > g.puntos) { g.puntos = puntos; g.dueno = a.id; }
+      grupo.set(k, g);
+    });
+    const filas = lista.map((a) => {
+      const rt = esRt(a);
       const par = d.claves.find(([nombre]) => String(a.anuncio).includes(nombre));
-      const v = !rt && par && hayVentas ? porClave.get(par[1]) : null;
+      const gr = !rt && par ? grupo.get(par[1]) : null;
+      const soyDueno = !!gr && gr.dueno === a.id;
+      const gEf = soyDueno ? gr.gasto : a.gasto;
+      const v = !rt && par && soyDueno && hayVentas ? porClave.get(par[1]) : null;
       const ventas = rt || !hayVentas ? null : Number(v ? v.ventas : 0);
       const vendidas = ventas != null ? ventas : a.compras_meta;
       const costoVisita = a.visitas > 0 ? a.gasto / a.visitas : null;
@@ -131,13 +238,13 @@
       if (['PAUSED', 'CAMPAIGN_PAUSED', 'ADSET_PAUSED', 'ARCHIVED', 'DELETED'].includes(a.estado)) { luz = 'Apagado'; clase = 'apagado'; motivo = 'Está pausado.'; }
       else if (['IN_PROCESS', 'PENDING_REVIEW'].includes(a.estado)) { luz = 'En revisión'; clase = 'revision'; motivo = 'Meta lo está revisando.'; }
       else if (['DISAPPROVED', 'WITH_ISSUES'].includes(a.estado)) { luz = 'Sacar'; clase = 'sacar'; motivo = 'Meta lo rechazó o tiene un problema: hay que reemplazarlo.'; }
-      else if (vendidas >= 2 && a.gasto / vendidas <= MAX) { luz = 'Escalar'; clase = 'escalar'; motivo = 'Vende a ' + (a.gasto / vendidas).toFixed(2) + ' US$ por venta: subirle 20% el presupuesto.'; }
-      else if (a.gasto >= 2 * MAX && !(vendidas > 0)) { luz = 'Sacar'; clase = 'sacar'; motivo = 'Gastó ' + a.gasto.toFixed(2) + ' US$ sin vender: pausarlo.'; }
+      else if (vendidas >= 2 && gEf / vendidas <= MAX) { luz = 'Escalar'; clase = 'escalar'; motivo = 'Vende a ' + (gEf / vendidas).toFixed(2) + ' US$ por venta: subirle 20% el presupuesto.'; }
+      else if (gEf >= 2 * MAX && !(vendidas > 0)) { luz = 'Sacar'; clase = 'sacar'; motivo = 'Gastó ' + gEf.toFixed(2) + ' US$ sin vender: pausarlo.'; }
       else if (a.gasto >= MIN_GASTO && (costoVisita == null || costoVisita > VISITA_MAX)) { luz = 'Sacar'; clase = 'sacar'; motivo = costoVisita == null ? 'Gastó sin traer visitas: pausarlo.' : 'Cada visita sale ' + costoVisita.toFixed(2) + ' US$: pausarlo.'; }
       else if (a.gasto < MIN_GASTO) { luz = 'Esperando'; clase = 'esperando'; motivo = 'Le faltan ' + (MIN_GASTO - a.gasto).toFixed(2) + ' US$ de gasto para juzgarlo.'; }
       else { luz = 'Mantener'; clase = 'mantener'; motivo = 'Va bien de visitas; hay que ver si vende.'; }
       return { id: a.id, anuncio: a.anuncio, tipo: rt ? 'RT' : 'Prueba', luz, clase, estado: a.estado, gasto: a.gasto, visitas: a.visitas,
-        costo_visita: costoVisita, carritos: a.carritos, compras_meta: a.compras_meta, ventas, costo_venta: vendidas > 0 ? a.gasto / vendidas : null, motivo };
+        costo_visita: costoVisita, carritos: a.carritos, compras_meta: a.compras_meta, ventas, costo_venta: vendidas > 0 ? gEf / vendidas : null, motivo };
     });
     filas.sort((x, y) => (ORDEN[x.luz] - ORDEN[y.luz]) || (y.gasto - x.gasto));
     const suma = (k) => filas.reduce((s, r) => s + (Number(r[k]) || 0), 0);
@@ -183,6 +290,132 @@
     cont.innerHTML = s;
   }
 
+  // ── Secciones nuevas: hoy, campañas, edades, WhatsApp, día por día, estado, pendientes y notas ──────────────────────
+  const FECHA = new Intl.DateTimeFormat('es-AR', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'numeric' });
+  const dia = (iso) => FECHA.format(new Date(iso + 'T12:00:00Z'));
+  const HORA = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const ESTADO_TXT = { ACTIVE: 'Andando', PAUSED: 'Pausado', CAMPAIGN_PAUSED: 'Campaña pausada', ADSET_PAUSED: 'Conjunto pausado', IN_PROCESS: 'En revisión', PENDING_REVIEW: 'En revisión', WITH_ISSUES: 'Con problema', DISAPPROVED: 'Rechazado' };
+  const EDADES = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+', 'Sin dato'];
+  const pct = (a, b) => (b > 0 ? Math.round((a / b) * 100) : 0);
+  const n0 = (v) => (v ? NUM.format(v) : '—');
+  const u2 = (v) => (v ? USD.format(v) : '—');
+  const fila = (tb, celdas, etiquetas, negrita) => {
+    const tr = el('tr');
+    celdas.forEach((t, i) => { const td = el('td', null, t); td.dataset.l = etiquetas[i] || ''; if (negrita) td.style.fontWeight = '700'; tr.append(td); });
+    tb.append(tr);
+  };
+  const mostrarSec = (id, v) => { $(id).hidden = !v; };
+
+  function extra(d) {
+    const camps = Array.isArray(d.campanas) ? d.campanas : null;
+    const wsp = Array.isArray(d.wsp) ? d.wsp : null;
+    const manual = d.manual || null;
+
+    // Hoy
+    if (d.hoy && camps) {
+      const h = d.hoy;
+      const activas = camps.filter((c) => c.estado === 'ACTIVE');
+      const presup = activas.reduce((s, c) => s + (c.presupuesto || 0), 0);
+      const charlas = wsp ? wsp.reduce((s, w) => s + (w.charlas || 0), 0) : null;
+      const respondidas = wsp ? wsp.reduce((s, w) => s + (w.respondidas || 0), 0) : null;
+      const ventasConf = Array.isArray(d.ventas) && d.ventas.length ? d.ventas.reduce((s, v) => s + Number(v.ventas || 0), 0) : (manual && Array.isArray(manual.ventas) ? manual.ventas.length : null);
+      const t = [
+        tile('Gasto de hoy', USD.format(h.gasto), 'de <b>' + USD0.format(presup) + '</b> por día en las campañas andando'),
+        tile('Visitas a la web', NUM.format(h.visitas), 'a <b>' + (h.visitas > 0 ? USD.format(h.gasto / h.visitas) : '—') + '</b> cada una (todo el gasto, incluido WhatsApp)'),
+        tile('Abrieron el formulario', NUM.format(h.carritos), 'es el "carrito" del píxel'),
+        tile('Lo enviaron', NUM.format(h.inicios), h.carritos > 0 ? '<b>' + pct(h.inicios, h.carritos) + '%</b> de los que lo abrieron' : 'inicio de compra'),
+        tile('Compras que vio Meta', NUM.format(h.compras), 'con el servidor caído, Meta no las recibe'),
+      ];
+      if (charlas != null) t.push(tile('Charlas de WhatsApp', NUM.format(charlas), 'desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + ' · <b>' + NUM.format(respondidas || 0) + '</b> respondidas'));
+      if (ventasConf != null) t.push(tile('Ventas confirmadas', NUM.format(ventasConf), Array.isArray(d.ventas) && d.ventas.length ? 'de la base de pedidos' : 'anotadas a mano desde el 7/11'));
+      $('hoy').replaceChildren(...t);
+      $('hoy-tit').textContent = 'Hoy · ' + dia(h.fecha);
+      $('hoy-nota').textContent = 'Todas las campañas juntas, con los datos de Meta de hoy.';
+    }
+    mostrarSec('sec-hoy', !!(d.hoy && camps));
+
+    // Campañas
+    if (camps) {
+      const tb = $('camp'); tb.replaceChildren();
+      const orden = camps.slice().sort((a, b) => ((b.estado === 'ACTIVE') - (a.estado === 'ACTIVE')) || (b.total.gasto - a.total.gasto));
+      const L = ['', 'Estado', 'Presupuesto por día', 'Gasto hoy', 'Gasto total', 'Visitas', 'Abrieron el formulario', 'Lo enviaron', 'Compras Meta'];
+      orden.forEach((c) => fila(tb, [c.nombre, ESTADO_TXT[c.estado] || c.estado, c.presupuesto ? USD0.format(c.presupuesto) : '—', u2(c.hoy.gasto), u2(c.total.gasto),
+        n0(c.total.visitas), n0(c.total.carritos), n0(c.total.inicios), n0(c.total.compras)], L));
+    }
+    mostrarSec('sec-camp', !!camps);
+
+    // Edades
+    const ed = d.edades && Array.isArray(d.edades.por_campana) ? d.edades.por_campana.filter((c) => (c.total || []).some((x) => x.gasto > 0)) : [];
+    if (ed.length) {
+      $('edad-ley').replaceChildren(...EDADES.map((e, i) => { const s = el('span'); const q = el('i', 'e' + i); s.append(q, document.createTextNode(e)); return s; }));
+      $('edad-nota').textContent = 'Cómo se reparte el gasto por edad, hoy y desde el 7/11. Las campañas están configuradas para mujeres de 25 a 55 (web) y de 25 a 44 (WhatsApp): los mayores de 65 (rojo) tendrían que quedar en 0%.';
+      const cont = $('edad'); cont.replaceChildren();
+      ed.sort((a, b) => b.total.reduce((s, x) => s + x.gasto, 0) - a.total.reduce((s, x) => s + x.gasto, 0));
+      ed.forEach((c) => {
+        const bloque = el('div', 'fila-edad');
+        bloque.append(el('div', 'tit', c.nombre));
+        [['Hoy', c.hoy], ['Desde el 7/11', c.total]].forEach(([rot, lista]) => {
+          const tot = (lista || []).reduce((s, x) => s + x.gasto, 0);
+          if (!(tot > 0)) return;
+          const g65 = (lista.find((x) => x.edad === '65+') || { gasto: 0 }).gasto;
+          const p65 = pct(g65, tot);
+          const cab = el('div', 'tit');
+          cab.append(el('span', null, rot + ' · ' + USD.format(tot)));
+          const r = el('span', p65 > 20 ? 'mal65' : p65 <= 5 ? 'bien65' : '', 'Mayores de 65: ' + p65 + '% del gasto');
+          cab.append(r);
+          const barra = el('div', 'barra');
+          lista.forEach((x) => { if (!(x.gasto > 0)) return; const i = el('i', 'e' + Math.max(0, EDADES.indexOf(x.edad))); i.style.width = (x.gasto / tot * 100) + '%'; i.title = x.edad + ': ' + USD.format(x.gasto) + ' (' + pct(x.gasto, tot) + '%)'; barra.append(i); });
+          bloque.append(cab, barra);
+        });
+        cont.append(bloque);
+      });
+    }
+    mostrarSec('sec-edad', ed.length > 0);
+
+    // WhatsApp
+    if (wsp && wsp.length) {
+      const tb = $('wsp'); tb.replaceChildren();
+      const L = ['', 'Estado', 'Gasto', 'Charlas', 'US$ por charla', 'Respondidas', 'Compras Meta', 'US$ por compra'];
+      let tg = 0, tc = 0, tr = 0, tp = 0;
+      wsp.filter((w) => w.gasto > 0 || w.estado === 'ACTIVE').forEach((w) => {
+        tg += w.gasto; tc += w.charlas || 0; tr += w.respondidas || 0; tp += w.compras_meta || 0;
+        fila(tb, [w.anuncio, ESTADO_TXT[w.estado] || w.estado, u2(w.gasto), n0(w.charlas), w.charlas > 0 ? USD.format(w.gasto / w.charlas) : '—', n0(w.respondidas), n0(w.compras_meta), w.compras_meta > 0 ? USD.format(w.gasto / w.compras_meta) : '—'], L);
+      });
+      fila(tb, ['Total', '', u2(tg), n0(tc), tc > 0 ? USD.format(tg / tc) : '—', n0(tr), n0(tp), tp > 0 ? USD.format(tg / tp) : '—'], L, true);
+      $('wsp-nota').textContent = 'Desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + ' (cuando se volvió a prender). Charlas = conversaciones iniciadas; Respondidas = a las que se les contestó. Las compras son las que Meta recibió: con el servidor caído no le llegan, así que las ventas de WhatsApp las confirma Dolo.';
+    }
+    mostrarSec('sec-wsp', !!(wsp && wsp.length));
+
+    // Día por día
+    if (Array.isArray(d.dias) && d.dias.length) {
+      const tb = $('dias'); tb.replaceChildren();
+      const L = ['', 'Gasto', 'Visitas', 'Abrieron el formulario', 'Lo enviaron', 'Compras Meta'];
+      d.dias.slice().sort((a, b) => (a.fecha < b.fecha ? 1 : -1)).forEach((x) => fila(tb, [dia(x.fecha), u2(x.gasto), n0(x.visitas), n0(x.carritos), n0(x.inicios), n0(x.compras)], L));
+    }
+    mostrarSec('sec-dias', Array.isArray(d.dias) && d.dias.length > 0);
+
+    // Estado del sistema
+    if (d.estado && Array.isArray(d.estado.items)) {
+      $('estado').replaceChildren(...d.estado.items.map((i) => {
+        const f = el('div', 'est'); const t = el('div'); t.append(el('b', null, i.nombre), el('span', null, i.detalle));
+        f.append(el('i', 'punto ' + (i.ok ? 'ok' : 'mal')), t); return f;
+      }));
+      $('estado-nota').textContent = 'Chequeo automático de ' + HORA.format(new Date(d.estado.chequeado)) + '.';
+    }
+    mostrarSec('sec-estado', !!(d.estado && Array.isArray(d.estado.items)));
+
+    // Pendientes y notas (las carga Claude a mano en site/manual.json)
+    if (manual && Array.isArray(manual.pendientes) && manual.pendientes.length) {
+      $('pend').replaceChildren(...manual.pendientes.map((p) => { const li = el('li'); li.append(document.createTextNode(p.texto + ' '), el('span', 'quien', '— ' + p.quien + ' · ' + p.estado)); return li; }));
+    }
+    mostrarSec('sec-pend', !!(manual && manual.pendientes && manual.pendientes.length));
+    const notas = [];
+    if (manual && Array.isArray(manual.ventas)) manual.ventas.forEach((v) => notas.push('Venta confirmada: ' + v.detalle + ' · $' + NUM.format(v.monto) + ' · ' + v.fuente + ' · ' + v.fecha));
+    if (manual && Array.isArray(manual.notas)) manual.notas.forEach((t) => notas.push(t));
+    if (notas.length) $('notas').replaceChildren(...notas.map((t) => el('li', null, t)));
+    mostrarSec('sec-notas', notas.length > 0);
+  }
+
   function mostrar(d) {
     const R = d.reglas, { filas, resumen: r } = calcular(d);
     const cuando = new Date(d.actualizado);
@@ -224,6 +457,7 @@
     $('notagraf').textContent = 'Anuncios que ya trajeron visitas. La línea punteada es el límite de ' + USD.format(R.visitaMax) + ' por visita: un anuncio que gastó más de ' +
       USD0.format(R.minGasto) + ' y queda a la derecha de la línea se saca.';
     dibujarGrafico(filas, R);
+    extra(d);
 
     const reglas = [
       ['Esperando', 'Gastó menos de ' + USD0.format(R.minGasto) + '. Todavía no se puede juzgar.'],

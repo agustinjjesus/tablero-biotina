@@ -1,21 +1,41 @@
-// Arma site/datos.json con los números de Meta (y las ventas reales de la base, si hay).
-//   node scripts/armar.js meta.json [ventas.json]
+// Arma site/datos.json con los números de Meta, las ventas reales de la base (si hay), el gasto por edad y por día,
+// las charlas de WhatsApp, el estado del sistema y las notas manuales (site/manual.json).
+//   node scripts/armar.js meta.json [ventas.json] [--dias dias.json] [--wsp wsp.json] [--estado estado.json]
 // meta.json: la respuesta de ads_get_ad_entities (level ad, date_preset maximum) de las campañas de scripts/config.json.
 // ventas.json (opcional): [{clave, pedidos, ventas, cobrado_ars}] que arma tablero-ventas.js. Si falta, se conservan las últimas ventas guardadas.
+// dias.json (opcional): ads_get_ad_entities level campaign, breakdowns ["age"], time_increment "1", desde config.inicio hasta hoy.
+// wsp.json (opcional): ads_get_ad_entities level ad de la campaña de WhatsApp desde config.whatsappDesde, con cost_per_action_type.
+// estado.json (opcional): lo arma scripts/estado.js (chequeos de la web, el servidor y el cobro).
+// Lo que falta se conserva de la última corrida, así una consulta que falla no borra el tablero.
 const fs = require('fs');
 const path = require('path');
 const raiz = path.join(__dirname, '..');
 const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
-const destino = path.join(raiz, 'site', 'datos.json');
-const [metaArg, ventasArg] = process.argv.slice(2);
-if (!metaArg) { console.error('uso: node scripts/armar.js meta.json [ventas.json]'); process.exit(1); }
+const destino = process.env.DATOS_SALIDA || path.join(raiz, 'site', 'datos.json'); // DATOS_SALIDA solo para pruebas
 
-let meta = JSON.parse(fs.readFileSync(metaArg, 'utf8'));
-let lista = Array.isArray(meta) ? meta : meta.ad_entities;
-if (typeof lista === 'string') lista = JSON.parse(lista);
-if (!Array.isArray(lista) || !lista.length) { console.error('meta.json no trae anuncios'); process.exit(1); }
+const pos = [];
+const op = {};
+const args = process.argv.slice(2);
+for (let i = 0; i < args.length; i++) {
+  if (args[i].indexOf('--') === 0) { op[args[i].slice(2)] = args[i + 1]; i++; } else pos.push(args[i]);
+}
+const metaArg = pos[0];
+const ventasArg = pos[1];
+if (!metaArg) { console.error('uso: node scripts/armar.js meta.json [ventas.json] [--dias dias.json] [--wsp wsp.json] [--estado estado.json]'); process.exit(1); }
+
+function leerLista(archivo) {
+  try {
+    const m = JSON.parse(fs.readFileSync(archivo, 'utf8'));
+    let l = Array.isArray(m) ? m : m.ad_entities;
+    if (typeof l === 'string') l = JSON.parse(l);
+    return Array.isArray(l) ? l : null;
+  } catch (e) { return null; }
+}
 
 const n = (v) => (v == null ? 0 : typeof v === 'object' ? Number(v.value) || 0 : Number(String(v).replace('%', '').replace(',', '.')) || 0);
+
+const lista = leerLista(metaArg);
+if (!lista || !lista.length) { console.error('meta.json no trae anuncios'); process.exit(1); }
 const anuncios = lista
   .filter((r) => !cfg.campanas.length || cfg.campanas.includes(String(r.campaign_id)))
   .map((r) => ({
@@ -37,7 +57,85 @@ if (ventasArg && fs.existsSync(ventasArg)) {
   } catch (e) { console.error('ventas.json ilegible: se conservan las ventas anteriores'); }
 }
 
-const datos = { actualizado: ahora, inicio: cfg.inicio, reglas: cfg.reglas, claves: cfg.claves, anuncios, ventas, ventas_actualizadas: ventasAct };
+// ── Gasto por día y por edad ────────────────────────────────────────────────────────────────────
+const tipoDe = (nombre) => (/whatsapp/i.test(nombre) ? 'whatsapp' : /retargeting/i.test(nombre) ? 'retargeting' : /ugc/i.test(nombre) ? 'ugc' : 'web');
+const vacio = () => ({ gasto: 0, visitas: 0, carritos: 0, inicios: 0, compras: 0 });
+const sumar = (a, m) => { a.gasto += m.gasto; a.visitas += m.visitas; a.carritos += m.carritos; a.inicios += m.inicios; a.compras += m.compras; return a; };
+const redondear = (m) => ({ gasto: +m.gasto.toFixed(2), visitas: m.visitas, carritos: m.carritos, inicios: m.inicios, compras: m.compras });
+const ORDEN_EDAD = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+', 'Sin dato'];
+
+let hoy = previo.hoy || null, dias = previo.dias || null, campanas = previo.campanas || null, edades = previo.edades || null;
+let diasAct = previo.dias_actualizados || null;
+const filasDias = op.dias ? leerLista(op.dias) : null;
+if (filasDias && filasDias.length) {
+  const porCamp = new Map(), porDia = new Map(), edadTot = new Map(), edadHoy = new Map();
+  let ultima = '';
+  for (const r of filasDias) { if (r.date_start && r.date_start > ultima) ultima = r.date_start; }
+  for (const r of filasDias) {
+    const id = String(r.id), fecha = r.date_start || '';
+    const m = { gasto: n(r.amount_spent), visitas: n(r.landing_page_view), carritos: n(r.omni_add_to_cart), inicios: n(r.omni_initiated_checkout), compras: n(r.omni_purchase) };
+    if (!porCamp.has(id)) porCamp.set(id, { id, nombre: r.name, tipo: tipoDe(r.name || ''), estado: r.effective_status, presupuesto: n(r.daily_budget), total: vacio(), hoy: vacio(), _f: '' });
+    const c = porCamp.get(id);
+    if (fecha >= c._f) { c._f = fecha; c.estado = r.effective_status; c.presupuesto = n(r.daily_budget); c.nombre = r.name; }
+    sumar(c.total, m);
+    if (fecha === ultima) sumar(c.hoy, m);
+    if (!porDia.has(fecha)) porDia.set(fecha, vacio());
+    sumar(porDia.get(fecha), m);
+    let edad = String(r.age == null ? '' : r.age);
+    if (!edad || edad === 'null' || edad === 'Unknown') edad = 'Sin dato';
+    for (const [mapa, vale] of [[edadTot, true], [edadHoy, fecha === ultima]]) {
+      if (!vale) continue;
+      if (!mapa.has(id)) mapa.set(id, new Map());
+      const e = mapa.get(id);
+      if (!e.has(edad)) e.set(edad, vacio());
+      sumar(e.get(edad), m);
+    }
+  }
+  const aLista = (e) => [...e.entries()].sort((a, b) => ORDEN_EDAD.indexOf(a[0]) - ORDEN_EDAD.indexOf(b[0])).map(([edad, m]) => Object.assign({ edad }, redondear(m)));
+  campanas = [...porCamp.values()].map((c) => ({ id: c.id, nombre: c.nombre, tipo: c.tipo, estado: c.estado, presupuesto: c.presupuesto, total: redondear(c.total), hoy: redondear(c.hoy) }));
+  dias = [...porDia.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([fecha, m]) => Object.assign({ fecha }, redondear(m)));
+  hoy = Object.assign({ fecha: ultima }, redondear(porDia.get(ultima) || vacio()));
+  edades = {
+    fecha_hoy: ultima,
+    por_campana: [...porCamp.values()].map((c) => ({ id: c.id, nombre: c.nombre, tipo: c.tipo, total: aLista(edadTot.get(c.id) || new Map()), hoy: aLista(edadHoy.get(c.id) || new Map()) })),
+  };
+  diasAct = ahora;
+} else if (op.dias) {
+  console.error('dias.json ilegible o vacío: se conservan los datos por día y por edad anteriores');
+}
+
+// ── WhatsApp: charlas = gasto / costo por charla (Meta no da la cantidad suelta) ─────────────────────────────
+let wsp = previo.wsp || null, wspAct = previo.wsp_actualizado || null;
+const filasWsp = op.wsp ? leerLista(op.wsp) : null;
+if (filasWsp && filasWsp.length) {
+  const CH = 'cost_per_action_type:onsite_conversion.messaging_conversation_started_7d';
+  const RE = 'cost_per_action_type:onsite_conversion.messaging_first_reply';
+  wsp = filasWsp.map((r) => {
+    const gasto = n(r.amount_spent), cCharla = n(r[CH]), cResp = n(r[RE]);
+    return { id: String(r.id), anuncio: r.name, estado: r.effective_status, gasto, charlas: cCharla > 0 ? Math.round(gasto / cCharla) : (gasto > 0 ? 0 : null),
+      respondidas: cResp > 0 ? Math.round(gasto / cResp) : (gasto > 0 ? 0 : null), compras_meta: n(r.omni_purchase) };
+  }).sort((a, b) => b.gasto - a.gasto);
+  wspAct = ahora;
+} else if (op.wsp) {
+  console.error('wsp.json ilegible o vacío: se conservan las charlas anteriores');
+}
+
+// ── Estado del sistema y notas manuales ───────────────────────────────────────────────────────────
+let estado = previo.estado || null;
+if (op.estado && fs.existsSync(op.estado)) {
+  try { estado = JSON.parse(fs.readFileSync(op.estado, 'utf8')); } catch (e) { console.error('estado.json ilegible: se conserva el estado anterior'); }
+}
+let manual = previo.manual || null;
+try { manual = JSON.parse(fs.readFileSync(path.join(raiz, 'site', 'manual.json'), 'utf8')); } catch (e) { /* sin notas */ }
+
+const datos = {
+  actualizado: ahora, inicio: cfg.inicio, whatsapp_desde: cfg.whatsappDesde || null, reglas: cfg.reglas, claves: cfg.claves, anuncios,
+  ventas, ventas_actualizadas: ventasAct,
+  hoy, dias, campanas, edades, dias_actualizados: diasAct,
+  wsp, wsp_actualizado: wspAct, estado, manual,
+};
 fs.writeFileSync(destino, JSON.stringify(datos, null, 1));
 const gasto = anuncios.reduce((s, a) => s + a.gasto, 0);
-console.log('anuncios ' + anuncios.length + ' · gasto US$ ' + gasto.toFixed(2) + ' · ventas ' + (ventas ? ventas.reduce((s, v) => s + Number(v.ventas || 0), 0) : 'sin cargar'));
+console.log('anuncios ' + anuncios.length + ' · gasto US$ ' + gasto.toFixed(2) + ' · ventas ' + (ventas ? ventas.reduce((s, v) => s + Number(v.ventas || 0), 0) : 'sin cargar') +
+  ' · hoy ' + (hoy ? 'US$ ' + hoy.gasto.toFixed(2) : 'sin datos') + ' · charlas WhatsApp ' + (wsp ? wsp.reduce((s, w) => s + (w.charlas || 0), 0) : 'sin datos') +
+  ' · estado ' + (estado ? estado.items.filter((i) => i.ok === false).length + ' con problema' : 'sin chequeo'));

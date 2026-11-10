@@ -1,0 +1,52 @@
+{
+  "actualizado": "2026-11-09",
+  "pendientes": [
+    {
+      "texto": "Reactivar el servidor de pedidos y el bot de WhatsApp (caído desde el 8/11). Mientras tanto no se registran pedidos ni avisos de venta, el bot no contesta y Meta no recibe las compras.",
+      "quien": "Agustín",
+      "estado": "pendiente"
+    },
+    {
+      "texto": "Activar el cobro integrado de Mercado Pago. El código ya está publicado en la web: falta cargar el Worker en Cloudflare con el token de producción.",
+      "quien": "Agustín",
+      "estado": "pendiente"
+    },
+    {
+      "texto": "Dolo atiende WhatsApp desde su celular. La campaña de compra se prendió el 9/11 a la noche, con unas 12 charlas por día a 50 US$.",
+      "quien": "Dolo",
+      "estado": "en curso"
+    },
+    {
+      "texto": "Revisar la campaña de WhatsApp: charlas, gasto y ventas. Si la frecuencia pasa de 2,5, ampliar las edades a 25-49. Decidir si seguimos con objetivo compra o pasamos a conversaciones.",
+      "quien": "Claude",
+      "estado": "para el 10/11"
+    },
+    {
+      "texto": "Revisar que los conjuntos nuevos de la web (mujeres de 25 a 55) no gasten en mayores de 65 y que Meta haya aprobado todos los anuncios.",
+      "quien": "Claude",
+      "estado": "para el 10/11"
+    },
+    {
+      "texto": "Decidir si se prende el anuncio \"UGC 36 Desagüe WhatsApp\" (cargado y pausado en el conjunto de WhatsApp).",
+      "quien": "Agustín",
+      "estado": "pendiente"
+    },
+    {
+      "texto": "Cuarto video UGC (\"Cuánto sale por día\") con luz natural y piel con textura, para que no se note que es IA.",
+      "quien": "Claude",
+      "estado": "pendiente"
+    },
+    {
+      "texto": "Decidir si los anuncios con personas generadas por IA se marcan como \"contenido con IA\".",
+      "quien": "Agustín",
+      "estado": "pendiente"
+    }
+  ],
+  "ventas": [],
+  "notas": [
+    "Ventas confirmadas desde el 7/11: ninguna conocida en Mercado Pago. La última venta aprobada fue el 6/11 a las 22:46 (Biotina x2, $30.000).",
+    "El 7/11 Mercado Pago rechazó 2 pagos con tarjeta de $39.000 por su antifraude. Las transferencias llegan a la cuenta de Dolo y desde acá no se ven: hay que preguntarle.",
+    "El 9/11 por la noche se corrigió el público de la web: mujeres de 25 a 55 fijas, sin el público automático de Meta, que mandaba cerca del 78% del gasto a mayores de 65.",
+    "El 9/11 a las 21 h se prendió la campaña de WhatsApp con objetivo compra: mujeres de 25 a 44 en CABA y 17 km, 50 US$ por día."
+  ]
+}

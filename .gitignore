@@ -2,3 +2,6 @@ meta.json
 ventas.json
 node_modules/
 .claude/
+dias.json
+wsp.json
+estado.json
