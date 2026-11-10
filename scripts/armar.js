@@ -66,29 +66,44 @@ const ORDEN_EDAD = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+', 'Sin dat
 
 let hoy = previo.hoy || null, dias = previo.dias || null, campanas = previo.campanas || null, edades = previo.edades || null;
 let diasAct = previo.dias_actualizados || null;
-const filasDias = op.dias ? leerLista(op.dias) : null;
-if (filasDias && filasDias.length) {
-  const porCamp = new Map(), porDia = new Map(), edadTot = new Map(), edadHoy = new Map();
-  let ultima = '';
-  for (const r of filasDias) { if (r.date_start && r.date_start > ultima) ultima = r.date_start; }
-  for (const r of filasDias) {
-    const id = String(r.id), fecha = r.date_start || '';
-    const m = { gasto: n(r.amount_spent), visitas: n(r.landing_page_view), carritos: n(r.omni_add_to_cart), inicios: n(r.omni_initiated_checkout), compras: n(r.omni_purchase) };
-    if (!porCamp.has(id)) porCamp.set(id, { id, nombre: r.name, tipo: tipoDe(r.name || ''), estado: r.effective_status, presupuesto: n(r.daily_budget), total: vacio(), hoy: vacio(), _f: '' });
-    const c = porCamp.get(id);
-    if (fecha >= c._f) { c._f = fecha; c.estado = r.effective_status; c.presupuesto = n(r.daily_budget); c.nombre = r.name; }
-    sumar(c.total, m);
-    if (fecha === ultima) sumar(c.hoy, m);
-    if (!porDia.has(fecha)) porDia.set(fecha, vacio());
-    sumar(porDia.get(fecha), m);
+// Las filas por día y por edad se guardan en datos.json (filas_dia): cada corrida pide a Meta solo los últimos días
+// y pisa esas fechas; lo anterior se conserva. Así el historial desde el inicio no depende de una consulta enorme.
+let filasDia = Array.isArray(previo.filas_dia) ? previo.filas_dia : [];
+const filasNuevas = op.dias ? leerLista(op.dias) : null;
+if (filasNuevas && filasNuevas.length) {
+  const mapa = new Map(filasDia.map((f) => [f.f + '|' + f.id + '|' + f.a, f]));
+  for (const r of filasNuevas) {
+    if (!r.date_start) continue;
     let edad = String(r.age == null ? '' : r.age);
     if (!edad || edad === 'null' || edad === 'Unknown') edad = 'Sin dato';
-    for (const [mapa, vale] of [[edadTot, true], [edadHoy, fecha === ultima]]) {
+    const f = { f: r.date_start, id: String(r.id), nombre: r.name, a: edad, estado: r.effective_status, presupuesto: n(r.daily_budget),
+      gasto: n(r.amount_spent), visitas: n(r.landing_page_view), carritos: n(r.omni_add_to_cart), inicios: n(r.omni_initiated_checkout), compras: n(r.omni_purchase) };
+    mapa.set(f.f + '|' + f.id + '|' + f.a, f);
+  }
+  filasDia = [...mapa.values()].filter((f) => f.f >= String(cfg.inicio).slice(0, 10)).sort((x, y) => (x.f < y.f ? -1 : x.f > y.f ? 1 : 0));
+  diasAct = ahora;
+} else if (op.dias) {
+  console.error('dias.json ilegible o vacío: se conservan los datos por día y por edad anteriores');
+}
+if (filasDia.length) {
+  const porCamp = new Map(), porDia = new Map(), edadTot = new Map(), edadHoy = new Map();
+  let ultima = '';
+  for (const f of filasDia) if (f.f > ultima) ultima = f.f;
+  for (const f of filasDia) {
+    const m = { gasto: f.gasto, visitas: f.visitas, carritos: f.carritos, inicios: f.inicios, compras: f.compras };
+    if (!porCamp.has(f.id)) porCamp.set(f.id, { id: f.id, nombre: f.nombre, tipo: tipoDe(f.nombre || ''), estado: f.estado, presupuesto: f.presupuesto, total: vacio(), hoy: vacio(), _f: '' });
+    const c = porCamp.get(f.id);
+    if (f.f >= c._f) { c._f = f.f; c.estado = f.estado; c.presupuesto = f.presupuesto; c.nombre = f.nombre; }
+    sumar(c.total, m);
+    if (f.f === ultima) sumar(c.hoy, m);
+    if (!porDia.has(f.f)) porDia.set(f.f, vacio());
+    sumar(porDia.get(f.f), m);
+    for (const [mapa, vale] of [[edadTot, true], [edadHoy, f.f === ultima]]) {
       if (!vale) continue;
-      if (!mapa.has(id)) mapa.set(id, new Map());
-      const e = mapa.get(id);
-      if (!e.has(edad)) e.set(edad, vacio());
-      sumar(e.get(edad), m);
+      if (!mapa.has(f.id)) mapa.set(f.id, new Map());
+      const e = mapa.get(f.id);
+      if (!e.has(f.a)) e.set(f.a, vacio());
+      sumar(e.get(f.a), m);
     }
   }
   const aLista = (e) => [...e.entries()].sort((a, b) => ORDEN_EDAD.indexOf(a[0]) - ORDEN_EDAD.indexOf(b[0])).map(([edad, m]) => Object.assign({ edad }, redondear(m)));
@@ -99,9 +114,6 @@ if (filasDias && filasDias.length) {
     fecha_hoy: ultima,
     por_campana: [...porCamp.values()].map((c) => ({ id: c.id, nombre: c.nombre, tipo: c.tipo, total: aLista(edadTot.get(c.id) || new Map()), hoy: aLista(edadHoy.get(c.id) || new Map()) })),
   };
-  diasAct = ahora;
-} else if (op.dias) {
-  console.error('dias.json ilegible o vacío: se conservan los datos por día y por edad anteriores');
 }
 
 // ── WhatsApp: charlas = gasto / costo por charla (Meta no da la cantidad suelta) ─────────────────────────────
@@ -131,7 +143,7 @@ try { manual = JSON.parse(fs.readFileSync(path.join(raiz, 'site', 'manual.json')
 const datos = {
   actualizado: ahora, inicio: cfg.inicio, whatsapp_desde: cfg.whatsappDesde || null, reglas: cfg.reglas, claves: cfg.claves, anuncios,
   ventas, ventas_actualizadas: ventasAct,
-  hoy, dias, campanas, edades, dias_actualizados: diasAct,
+  hoy, dias, campanas, edades, dias_actualizados: diasAct, filas_dia: filasDia,
   wsp, wsp_actualizado: wspAct, estado, manual,
 };
 fs.writeFileSync(destino, JSON.stringify(datos, null, 1));
