@@ -384,7 +384,11 @@
       fila(tb, ['Total', '', u2(tg), n0(tc), tc > 0 ? USD.format(tg / tc) : '—', n0(tr), n0(tp), tp > 0 ? USD.format(tg / tp) : '—'], L, true);
       $('wsp-nota').textContent = 'Desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + ' (cuando se volvió a prender). Charlas = conversaciones iniciadas; Respondidas = a las que se les contestó. Las compras son las que Meta recibió: con el servidor caído no le llegan, así que las ventas de WhatsApp las confirma Dolo.';
     }
-    mostrarSec('sec-wsp', !!(wsp && wsp.length));
+    const hayWsp = !!(wsp && wsp.length);
+    const campWsp = camps ? camps.find((c) => c.tipo === 'whatsapp') : null;
+    if (!hayWsp && campWsp) $('wsp-nota').textContent = 'La campaña "' + campWsp.nombre + '" está ' + (ESTADO_TXT[campWsp.estado] || campWsp.estado).toLowerCase() + ' con ' + USD0.format(campWsp.presupuesto || 0) + ' por día, pero todavía no gastó nada (Meta la está preparando). Cuando empiece a entregar, acá aparecen las charlas por anuncio.';
+    $('wsp').closest('.scroll').hidden = !hayWsp;
+    mostrarSec('sec-wsp', hayWsp || !!campWsp);
 
     // Día por día
     if (Array.isArray(d.dias) && d.dias.length) {
