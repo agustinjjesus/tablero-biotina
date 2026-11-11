@@ -78,6 +78,7 @@
   .pin { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; align-items: center; background: var(--bg); padding: 16px; z-index: 10; }
   .pin-caja input[type="password"] { width: 100%; min-width: 0; }
   .pin[hidden] { display: none; }
+  [hidden] { display: none !important; } /* sin esto, .tarjeta y .numeros (display flex/grid) ignoran el atributo hidden */
   .pin-caja { width: min(340px, 100%); background: var(--panel); border: 1px solid var(--linea); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
   .pin-caja h1 { font-size: 1.5rem; }
   .pin-caja input[type="password"] { font: inherit; font-size: 1.8rem; letter-spacing: .5em; text-align: center; padding: 10px; border-radius: 12px; border: 1px solid var(--linea); background: var(--bg); color: var(--texto); }
@@ -174,7 +175,7 @@
 
   <section class="numeros" id="numeros"></section>
 
-  <section class="tarjeta">
+  <section class="tarjeta" id="sec-semaforo">
     <h2>Semáforo por anuncio</h2>
     <p class="nota">Cada anuncio desde que se prendió. Prueba es la campaña "Inicio de compra" y RT la de retargeting a quienes ya visitaron la web. Las ventas de los RT se cuentan en el anuncio original, porque usan el mismo link.</p>
     <div class="scroll">
@@ -185,7 +186,7 @@
     </div>
   </section>
 
-  <section class="tarjeta">
+  <section class="tarjeta" id="sec-grafico">
     <h2>Cuánto cuesta cada visita a la web</h2>
     <p class="nota" id="notagraf"></p>
     <div class="grafico" id="grafico"></div>
@@ -196,7 +197,7 @@
     <p class="nota">Todas las campañas juntas, por día (hora de Argentina).</p>
     <div class="scroll">
       <table class="t2">
-        <thead><tr><th>Día</th><th>Gasto</th><th>Visitas</th><th>Abrieron el formulario</th><th>Lo enviaron</th><th>Compras Meta</th></tr></thead>
+        <thead><tr id="dias-cab"><th>Día</th><th>Gasto</th><th>Visitas</th><th>Abrieron el formulario</th><th>Lo enviaron</th><th>Compras Meta</th></tr></thead>
         <tbody id="dias"></tbody>
       </table>
     </div>
@@ -218,7 +219,7 @@
     <ul class="lista" id="notas"></ul>
   </section>
 
-  <details class="tarjeta">
+  <details class="tarjeta" id="sec-reglas">
     <summary>Cómo decide el semáforo</summary>
     <dl id="reglas"></dl>
   </details>
@@ -349,13 +350,15 @@
       const charlas = wsp ? wsp.reduce((s, w) => s + (w.charlas || 0), 0) : null;
       const respondidas = wsp ? wsp.reduce((s, w) => s + (w.respondidas || 0), 0) : null;
       const ventasConf = Array.isArray(d.ventas) && d.ventas.length ? d.ventas.reduce((s, v) => s + Number(v.ventas || 0), 0) : (manual && Array.isArray(manual.ventas) ? manual.ventas.length : null);
-      const t = [
-        tile('Gasto de hoy', USD.format(h.gasto), 'de <b>' + USD0.format(presup) + '</b> por día en las campañas andando'),
-        tile('Visitas a la web', NUM.format(h.visitas), 'a <b>' + (h.visitas > 0 ? USD.format(h.gasto / h.visitas) : '—') + '</b> cada una (todo el gasto, incluido WhatsApp)'),
-        tile('Abrieron el formulario', NUM.format(h.carritos), 'es el "carrito" del píxel'),
-        tile('Lo enviaron', NUM.format(h.inicios), h.carritos > 0 ? '<b>' + pct(h.inicios, h.carritos) + '%</b> de los que lo abrieron' : 'inicio de compra'),
-        tile('Compras que vio Meta', NUM.format(h.compras), 'con el servidor caído, Meta no las recibe'),
-      ];
+      const hayWeb = camps.some((c) => c.tipo !== 'whatsapp'); // sin campañas de la web no se muestran visitas ni formulario
+      const t = [tile('Gasto de hoy', USD.format(h.gasto), 'de <b>' + USD0.format(presup) + '</b> por día en las campañas andando')];
+      if (hayWeb) {
+        t.push(
+          tile('Visitas a la web', NUM.format(h.visitas), 'a <b>' + (h.visitas > 0 ? USD.format(h.gasto / h.visitas) : '—') + '</b> cada una (todo el gasto, incluido WhatsApp)'),
+          tile('Abrieron el formulario', NUM.format(h.carritos), 'es el "carrito" del píxel'),
+          tile('Lo enviaron', NUM.format(h.inicios), h.carritos > 0 ? '<b>' + pct(h.inicios, h.carritos) + '%</b> de los que lo abrieron' : 'inicio de compra'));
+      }
+      t.push(tile('Compras que vio Meta', NUM.format(h.compras), 'con el servidor caído, Meta no las recibe'));
       if (charlas != null) t.push(tile('Charlas de WhatsApp', NUM.format(charlas), 'desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + ' · <b>' + NUM.format(respondidas || 0) + '</b> respondidas'));
       if (ventasConf != null) t.push(tile('Ventas confirmadas', NUM.format(ventasConf), Array.isArray(d.ventas) && d.ventas.length ? 'de la base de pedidos' : 'anotadas a mano desde el 7/11'));
       $('hoy').replaceChildren(...t);
@@ -396,7 +399,10 @@
     const ed = d.edades && Array.isArray(d.edades.por_campana) ? d.edades.por_campana.filter((c) => (c.total || []).some((x) => x.gasto > 0)) : [];
     if (ed.length) {
       $('edad-ley').replaceChildren(...EDADES.map((e, i) => { const s = el('span'); const q = el('i', 'e' + i); s.append(q, document.createTextNode(e)); return s; }));
-      $('edad-nota').textContent = 'Cómo se reparte el gasto por edad, hoy y desde el 7/11. Las campañas están configuradas para mujeres de 25 a 55 (web) y de 25 a 44 (WhatsApp): los mayores de 65 (rojo) tendrían que quedar en 0%.';
+      const hayWebEdad = ed.some((c) => c.tipo !== 'whatsapp');
+      $('edad-nota').textContent = hayWebEdad
+        ? 'Cómo se reparte el gasto por edad, hoy y desde el 7/11. Las campañas están configuradas para mujeres de 25 a 55 (web) y de 25 a 44 (WhatsApp): los mayores de 65 (rojo) tendrían que quedar en 0%.'
+        : 'Cómo se reparte el gasto por edad, hoy y desde el 7/11. La campaña está configurada para mujeres de 25 a 44: los mayores de 65 (rojo) tendrían que quedar en 0%.';
       const cont = $('edad'); cont.replaceChildren();
       ed.sort((a, b) => b.total.reduce((s, x) => s + x.gasto, 0) - a.total.reduce((s, x) => s + x.gasto, 0));
       ed.forEach((c) => {
@@ -441,8 +447,10 @@
     // Día por día
     if (Array.isArray(d.dias) && d.dias.length) {
       const tb = $('dias'); tb.replaceChildren();
-      const L = ['', 'Gasto', 'Visitas', 'Abrieron el formulario', 'Lo enviaron', 'Compras Meta'];
-      d.dias.slice().sort((a, b) => (a.fecha < b.fecha ? 1 : -1)).forEach((x) => fila(tb, [dia(x.fecha), u2(x.gasto), n0(x.visitas), n0(x.carritos), n0(x.inicios), n0(x.compras)], L));
+      const hayWebDias = d.dias.some((x) => x.visitas || x.carritos || x.inicios); // si ya no hay campañas de la web, solo día, gasto y compras
+      const L = hayWebDias ? ['', 'Gasto', 'Visitas', 'Abrieron el formulario', 'Lo enviaron', 'Compras Meta'] : ['', 'Gasto', 'Compras Meta'];
+      $('dias-cab').replaceChildren(...['Día'].concat(L.slice(1)).map((t) => el('th', null, t)));
+      d.dias.slice().sort((a, b) => (a.fecha < b.fecha ? 1 : -1)).forEach((x) => fila(tb, hayWebDias ? [dia(x.fecha), u2(x.gasto), n0(x.visitas), n0(x.carritos), n0(x.inicios), n0(x.compras)] : [dia(x.fecha), u2(x.gasto), n0(x.compras)], L));
     }
     mostrarSec('sec-dias', Array.isArray(d.dias) && d.dias.length > 0);
 
@@ -470,6 +478,7 @@
 
   function mostrar(d) {
     const R = d.reglas, { filas, resumen: r } = calcular(d);
+    const hayWeb = filas.length > 0; // si no hay anuncios de la web, se esconde todo lo de la web (semáforo, visitas, gráfico)
     const cuando = new Date(d.actualizado);
     const fmt = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
     const punto = (t) => t.replace(/\.*$/, '.');
@@ -480,12 +489,21 @@
     $('viejo').hidden = !(min > 30);
     if (min > 30) $('viejo').textContent = 'Los números tienen ' + (min >= 120 ? Math.floor(min / 60) + ' horas' : Math.floor(min) + ' minutos') + ': puede que la actualización automática esté frenada.';
 
-    $('toma').innerHTML = '<b>' + NUM.format(r.andando) + '</b> anuncios andando en la web, <b>' + NUM.format(r.sacar) + '</b> para sacar y <b>' + NUM.format(r.escalar) +
-      '</b> para escalar. Las campañas de la prueba gastaron <b>' + USD.format(r.gasto) + '</b> desde el 7/11 a la noche.';
-    $('faltan').hidden = !r.faltan;
+    if (hayWeb) {
+      $('toma').innerHTML = '<b>' + NUM.format(r.andando) + '</b> anuncios andando en la web, <b>' + NUM.format(r.sacar) + '</b> para sacar y <b>' + NUM.format(r.escalar) +
+        '</b> para escalar. Las campañas de la prueba gastaron <b>' + USD.format(r.gasto) + '</b> desde el 7/11 a la noche.';
+    } else {
+      const w = Array.isArray(d.wsp) ? d.wsp : [];
+      const andandoW = w.filter((x) => ['ACTIVE', 'IN_PROCESS', 'PENDING_REVIEW'].includes(x.estado)).length;
+      const gastoW = w.reduce((s, x) => s + (x.gasto || 0), 0), charlasW = w.reduce((s, x) => s + (x.charlas || 0), 0);
+      $('toma').innerHTML = '<b>' + NUM.format(andandoW) + '</b> anuncios de WhatsApp andando. Gastaron <b>' + USD.format(gastoW) + '</b> y trajeron <b>' + NUM.format(charlasW) +
+        '</b> charlas desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + '.';
+    }
+    $('faltan').hidden = !(hayWeb && r.faltan);
     $('faltan').textContent = 'Quedan menos de ' + R.minAndando + ' anuncios andando o en revisión: hay que cargar anuncios nuevos.';
-    $('sinventas').hidden = !r.sin_ventas;
+    $('sinventas').hidden = !(hayWeb && r.sin_ventas);
 
+    $('numeros').hidden = !hayWeb;
     $('numeros').replaceChildren(
       tile('Gasto desde el 7/11', USD.format(r.gasto), 'Prueba + retargeting'),
       tile('Visitas a la web', NUM.format(r.visitas), 'a <b>' + c(r.costo_visita, (v) => USD.format(v)) + '</b> cada una'),
@@ -509,6 +527,7 @@
     $('notagraf').textContent = 'Anuncios que ya trajeron visitas. La línea punteada es el límite de ' + USD.format(R.visitaMax) + ' por visita: un anuncio que gastó más de ' +
       USD0.format(R.minGasto) + ' y queda a la derecha de la línea se saca.';
     dibujarGrafico(filas, R);
+    ['sec-semaforo', 'sec-grafico', 'sec-reglas'].forEach((id) => { $(id).hidden = !hayWeb; });
     extra(d);
 
     const reglas = [

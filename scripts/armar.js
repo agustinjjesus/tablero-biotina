@@ -68,7 +68,9 @@ let hoy = previo.hoy || null, dias = previo.dias || null, campanas = previo.camp
 let diasAct = previo.dias_actualizados || null;
 // Las filas por día y por edad se guardan en datos.json (filas_dia): cada corrida pide a Meta solo los últimos días
 // y pisa esas fechas; lo anterior se conserva. Así el historial desde el inicio no depende de una consulta enorme.
-let filasDia = Array.isArray(previo.filas_dia) ? previo.filas_dia : [];
+// Lo guardado de campañas que ya no están en config.json se descarta (así sale del tablero lo que dejamos de usar).
+const enConfig = (id) => !cfg.campanas.length || cfg.campanas.includes(String(id));
+let filasDia = (Array.isArray(previo.filas_dia) ? previo.filas_dia : []).filter((f) => enConfig(f.id));
 const filasNuevas = op.dias ? leerLista(op.dias) : null;
 if (filasNuevas && filasNuevas.length) {
   const mapa = new Map(filasDia.map((f) => [f.f + '|' + f.id + '|' + f.a, f]));
@@ -114,15 +116,18 @@ if (filasDia.length) {
     fecha_hoy: ultima,
     por_campana: [...porCamp.values()].map((c) => ({ id: c.id, nombre: c.nombre, tipo: c.tipo, total: aLista(edadTot.get(c.id) || new Map()), hoy: aLista(edadHoy.get(c.id) || new Map()) })),
   };
+} else {
+  // Sin filas de las campañas actuales: no dejar números viejos de campañas que ya no se muestran.
+  hoy = null; dias = null; campanas = null; edades = null;
 }
 
 // ── WhatsApp: charlas = gasto / costo por charla (Meta no da la cantidad suelta) ─────────────────────────────
-let wsp = previo.wsp || null, wspAct = previo.wsp_actualizado || null;
+let wsp = Array.isArray(previo.wsp) ? previo.wsp.filter((w) => (cfg.campanasWhatsapp || []).includes(String(w.campana_id))) : null, wspAct = previo.wsp_actualizado || null;
 const filasWsp = op.wsp ? leerLista(op.wsp) : null;
 if (filasWsp && filasWsp.length) {
   const CH = 'cost_per_action_type:onsite_conversion.messaging_conversation_started_7d';
   const RE = 'cost_per_action_type:onsite_conversion.messaging_first_reply';
-  wsp = filasWsp.map((r) => {
+  wsp = filasWsp.filter((r) => !(cfg.campanasWhatsapp || []).length || cfg.campanasWhatsapp.includes(String(r.campaign_id))).map((r) => {
     const gasto = n(r.amount_spent), cCharla = n(r[CH]), cResp = n(r[RE]);
     return { id: String(r.id), campana_id: String(r.campaign_id || ''), anuncio: r.name, estado: r.effective_status, gasto, charlas: cCharla > 0 ? Math.round(gasto / cCharla) : (gasto > 0 ? 0 : null),
       respondidas: cResp > 0 ? Math.round(gasto / cResp) : (gasto > 0 ? 0 : null), compras_meta: n(r.omni_purchase) };
