@@ -137,6 +137,27 @@ if (filasWsp && filasWsp.length) {
   console.error('wsp.json ilegible o vacío: se conservan las charlas anteriores');
 }
 
+// Charlas del día (WhatsApp): gasto de hoy / costo por charla, anuncio por anuncio. wsp_hoy.json = {"fecha":"AAAA-MM-DD","ad_entities":[...]}.
+// Una lista vacía quiere decir "hoy todavía no gastó nada": son 0 charlas. Si el archivo falta, se conserva lo último guardado.
+let wspHoy = previo.wsp_hoy || null;
+if (op.wsphoy && fs.existsSync(op.wsphoy)) {
+  try {
+    const crudo = JSON.parse(fs.readFileSync(op.wsphoy, 'utf8'));
+    const filasHoy = leerLista(op.wsphoy);
+    if (filasHoy && /^\d{4}-\d{2}-\d{2}$/.test(String(crudo.fecha))) {
+      const CHH = 'cost_per_action_type:onsite_conversion.messaging_conversation_started_7d';
+      const REH = 'cost_per_action_type:onsite_conversion.messaging_first_reply';
+      let g = 0, c = 0, rp = 0;
+      for (const r of filasHoy) {
+        if ((cfg.campanasWhatsapp || []).length && !cfg.campanasWhatsapp.includes(String(r.campaign_id))) continue;
+        const gasto = n(r.amount_spent), cc = n(r[CHH]), cr = n(r[REH]);
+        g += gasto; c += cc > 0 ? Math.round(gasto / cc) : 0; rp += cr > 0 ? Math.round(gasto / cr) : 0;
+      }
+      wspHoy = { fecha: String(crudo.fecha), gasto: +g.toFixed(2), charlas: c, respondidas: rp, actualizado: ahora };
+    } else console.error('wsp_hoy.json sin fecha o ilegible: se conserva lo anterior');
+  } catch (e) { console.error('wsp_hoy.json ilegible: se conserva lo anterior'); }
+}
+
 // ── Estado del sistema y notas manuales ───────────────────────────────────────────────────────────
 let estado = previo.estado || null;
 if (op.estado && fs.existsSync(op.estado)) {
@@ -145,11 +166,18 @@ if (op.estado && fs.existsSync(op.estado)) {
 let manual = previo.manual || null;
 try { manual = JSON.parse(fs.readFileSync(path.join(raiz, 'privado', 'manual.json'), 'utf8')); } catch (e) { /* sin notas */ }
 
+// Campañas de una cuenta restringida (ya no se pueden consultar): se muestran con su historial pero NO como andando.
+const caidas = (cfg.campanasCaidas || []).map(String);
+if (caidas.length) {
+  if (campanas) campanas.forEach((c) => { if (caidas.includes(String(c.id))) c.estado = 'ACCOUNT_RESTRICTED'; });
+  if (wsp) wsp.forEach((w) => { if (caidas.includes(String(w.campana_id))) w.estado = 'ACCOUNT_RESTRICTED'; });
+}
+
 const datos = {
   actualizado: ahora, inicio: cfg.inicio, whatsapp_desde: cfg.whatsappDesde || null, reglas: cfg.reglas, claves: cfg.claves, anuncios,
   ventas, ventas_actualizadas: ventasAct,
   hoy, dias, campanas, edades, dias_actualizados: diasAct, filas_dia: filasDia,
-  wsp, wsp_actualizado: wspAct, estado, manual,
+  wsp, wsp_actualizado: wspAct, wsp_hoy: wspHoy, estado, manual,
 };
 fs.writeFileSync(destino, JSON.stringify(datos, null, 1));
 

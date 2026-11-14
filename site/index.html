@@ -325,7 +325,7 @@
   const FECHA = new Intl.DateTimeFormat('es-AR', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'numeric' });
   const dia = (iso) => FECHA.format(new Date(iso + 'T12:00:00Z'));
   const HORA = new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
-  const ESTADO_TXT = { ACTIVE: 'Andando', PAUSED: 'Pausado', CAMPAIGN_PAUSED: 'Campaña pausada', ADSET_PAUSED: 'Conjunto pausado', IN_PROCESS: 'En revisión', PENDING_REVIEW: 'En revisión', WITH_ISSUES: 'Con problema', DISAPPROVED: 'Rechazado' };
+  const ESTADO_TXT = { ACTIVE: 'Andando', PAUSED: 'Pausado', CAMPAIGN_PAUSED: 'Campaña pausada', ADSET_PAUSED: 'Conjunto pausado', IN_PROCESS: 'En revisión', PENDING_REVIEW: 'En revisión', WITH_ISSUES: 'Con problema', DISAPPROVED: 'Rechazado', ACCOUNT_RESTRICTED: 'Cuenta restringida' };
   const EDADES = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+', 'Sin dato'];
   const pct = (a, b) => (b > 0 ? Math.round((a / b) * 100) : 0);
   const n0 = (v) => (v ? NUM.format(v) : '—');
@@ -359,7 +359,11 @@
           tile('Lo enviaron', NUM.format(h.inicios), h.carritos > 0 ? '<b>' + pct(h.inicios, h.carritos) + '%</b> de los que lo abrieron' : 'inicio de compra'));
       }
       t.push(tile('Compras que vio Meta', NUM.format(h.compras), 'con el servidor caído, Meta no las recibe'));
-      if (charlas != null) t.push(tile('Charlas de WhatsApp', NUM.format(charlas), 'desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + ' · <b>' + NUM.format(respondidas || 0) + '</b> respondidas'));
+      if (d.wsp_hoy) {
+        const wh = d.wsp_hoy, esHoy = wh.fecha === h.fecha;
+        t.push(tile(esHoy ? 'Charlas de hoy' : 'Charlas del ' + dia(wh.fecha), NUM.format(wh.charlas || 0),
+          '<b>' + NUM.format(wh.respondidas || 0) + '</b> respondidas' + (charlas != null ? ' · en total desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + ': <b>' + NUM.format(charlas) + '</b>' : '')));
+      } else if (charlas != null) t.push(tile('Charlas de WhatsApp', NUM.format(charlas), 'desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + ' · <b>' + NUM.format(respondidas || 0) + '</b> respondidas'));
       if (ventasConf != null) t.push(tile('Ventas confirmadas', NUM.format(ventasConf), Array.isArray(d.ventas) && d.ventas.length ? 'de la base de pedidos' : 'anotadas a mano desde el 7/11'));
       $('hoy').replaceChildren(...t);
       $('hoy-tit').textContent = 'Hoy · ' + dia(h.fecha);
@@ -494,10 +498,14 @@
         '</b> para escalar. Las campañas de la prueba gastaron <b>' + USD.format(r.gasto) + '</b> desde el 7/11 a la noche.';
     } else {
       const w = Array.isArray(d.wsp) ? d.wsp : [];
-      const andandoW = w.filter((x) => ['ACTIVE', 'IN_PROCESS', 'PENDING_REVIEW'].includes(x.estado)).length;
+      const vivos = ['ACTIVE', 'IN_PROCESS', 'PENDING_REVIEW'];
+      const andandoW = Array.isArray(d.anuncios) && d.anuncios.length
+        ? d.anuncios.filter((x) => /whatsapp/i.test(x.campana || '') && vivos.includes(x.estado)).length
+        : w.filter((x) => vivos.includes(x.estado)).length;
       const gastoW = w.reduce((s, x) => s + (x.gasto || 0), 0), charlasW = w.reduce((s, x) => s + (x.charlas || 0), 0);
       $('toma').innerHTML = '<b>' + NUM.format(andandoW) + '</b> anuncios de WhatsApp andando. Gastaron <b>' + USD.format(gastoW) + '</b> y trajeron <b>' + NUM.format(charlasW) +
-        '</b> charlas desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + '.';
+        '</b> charlas desde el ' + (d.whatsapp_desde ? dia(d.whatsapp_desde) : 'inicio') + '.' +
+        (d.wsp_hoy && d.hoy && d.wsp_hoy.fecha === d.hoy.fecha ? ' Hoy: <b>' + NUM.format(d.wsp_hoy.charlas || 0) + '</b> charlas.' : '');
     }
     $('faltan').hidden = !(hayWeb && r.faltan);
     $('faltan').textContent = 'Quedan menos de ' + R.minAndando + ' anuncios andando o en revisión: hay que cargar anuncios nuevos.';
